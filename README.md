@@ -1,8 +1,8 @@
-# Your startup name here
+# Decision Helper
 
 [My Notes](notes.md)
 
-A brief description of the application here. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Decision Helper is a web app that helps users make difficult choices by breaking decisions into options, criteria, and weighted priorities. Instead of relying on gut feeling alone, users can see a clear, ranked recommendation along with an explanation of how the decision was calculated.
 
 > [!NOTE]
 > This is a template for your startup application. You must modify this `README.md` file for each phase of your development. You only need to fill in the section for each deliverable when that deliverable is submitted in Canvas. Without completing the section for a deliverable, the TA will not know what to look for when grading your submission. Feel free to add additional information to each deliverable description, but make sure you at least have the list of rubric items and a description of what you did for each item.
@@ -25,37 +25,39 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 ### Elevator pitch
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Decision Helper is a simple web application designed to reduce the stress of decision-making. Users enter their available options, define the criteria that matter to them, and assign weights based on importance. The app calculates a ranked outcome and explains why one option rises to the top, helping users feel confident and intentional about their choices.
 
 ### Design
 
-![Design image](placeholder.png)
+![Login view](placeholder.png)
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+![Decision builder view](placeholder.png)
 
-```mermaid
-sequenceDiagram
-    actor You
-    actor Website
-    You->>Website: Replace this with your design
-```
+![Results view](placeholder.png)
+
+**Design notes**
+- Login/Register screen for returning users
+- Decision Builder screen with options, criteria, and weight inputs
+- Results screen showing ranked outcomes and score breakdowns
 
 ### Key features
 
-- Describe your key feature
-- Describe your key feature
-- Describe your key feature
+- Create decisions with multiple options
+- Define criteria and assign importance weights
+- Automatically calculate and rank outcomes
+- View clear explanations of how scores were computed
+- Save past decisions and revisit them later
 
 ### Technologies
 
 I am going to use the required technologies in the following ways.
 
-- **HTML** - Description here
-- **CSS** - Description here
-- **React** - Description here
-- **Service** - Description here
-- **DB/Login** - Description here
-- **WebSocket** - Description here
+- **HTML** - Semantic page structure for login, decision creation, and results views using forms, inputs, lists, and buttons.
+- **CSS** - Clean, minimal styling with responsive layouts using flexbox or grid, emphasizing readability and visual hierarchy.
+- **React** - Single-page application with routed views (login, builder, results, history) and reusable components that update dynamically as user input changes.
+- **Service** - Backend endpoints to create, update, score, and retrieve decisions, along with authentication and protected routes.
+- **DB/Login** - MongoDB used to store users, hashed credentials, decisions, criteria, weights, and scores so users can access saved decisions.
+- **WebSocket** - Real-time updates to decision results when values change, or shared decision sessions where updates are broadcast live.
 
 ## 🚀 AWS deliverable
 
