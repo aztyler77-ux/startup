@@ -69,15 +69,25 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **HTML pages** - I did not complete this part of the deliverable.
-- [ ] **Proper HTML element usage** - I did not complete this part of the deliverable.
-- [ ] **Links** - I did not complete this part of the deliverable.
-- [ ] **Text** - I did not complete this part of the deliverable.
-- [ ] **3rd party API placeholder** - I did not complete this part of the deliverable.
-- [ ] **Images** - I did not complete this part of the deliverable.
-- [ ] **Login placeholder** - I did not complete this part of the deliverable.
-- [ ] **DB data placeholder** - I did not complete this part of the deliverable.
-- [ ] **WebSocket placeholder** - I did not complete this part of the deliverable.
+- [x] **HTML pages**  
+  I created individual HTML pages for Home, Play, Scores, and About views.
+- [x] **Proper HTML element usage**  
+  Pages use the correct semantic HTML elements including a header, nav, main, section, footer, table, and necessary headings.
+- [x] **Links**  
+  The navigation links allow users to move between all of the pages.
+- [x] **Text**  
+  Each page includes a description that explains its purpose.
+- [x] **3rd party API placeholder**  
+  The About page has a placeholder section ready for for third-party API data once it's implemented.
+- [x] **Images**  
+  The About page has an image depicting a mock-up of the application concept.
+- [x] **Login placeholder**  
+  The Home page has a placeholder for login functionality to be implemented in the future.
+- [x] **DB data placeholder**  
+  The Scores page has a placeholder table for data that will later be loaded from a database.
+- [x] **WebSocket placeholder**  
+  A real-time update area will be added in a future deliverable.
+
 
 ## 🚀 CSS deliverable
 
