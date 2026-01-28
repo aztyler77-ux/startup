@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Decision Helper | Home</title>
 </head>
 <body>
@@ -22,8 +22,29 @@
     <p>This is the Decision Helper home page.</p>
 
     <section>
-      <h3>Login (placeholder)</h3>
-      <p>Login functionality will be implemented here.</p>
+      <h3>Login</h3>
+
+      <form>
+        <label for="username">Username</label><br />
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Enter username"
+        /><br /><br />
+
+        <label for="password">Password</label><br />
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Enter password"
+        /><br /><br />
+
+        <button type="button">Login</button>
+      </form>
+
+      <p><strong>Logged in as:</strong> guest</p>
     </section>
   </main>
 
