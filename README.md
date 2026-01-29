@@ -88,6 +88,10 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 - [x] **WebSocket placeholder**  
   A real-time update area will be added in a future deliverable.
 
+- Production Startup URL: https://tnich-startup.click
+- Production Simon URL: https://simon.tnich-startup.click
+- Notes: See `notes.md` for the steps I took, including deploying the official `simon-html` example using `deployFiles.sh`.
+
 
 ## 🚀 CSS deliverable
 
