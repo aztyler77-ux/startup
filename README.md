@@ -146,3 +146,10 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 - [ ] **Data sent over WebSocket connection** - I did not complete this part of the deliverable.
 - [ ] **WebSocket data displayed** - I did not complete this part of the deliverable.
 - [ ] **Application is fully functional** - I did not complete this part of the deliverable.
+
+## ✅ Startup HTML Deliverable
+
+- Production Startup URL: https://tnich-startup.click
+- Production Simon URL: https://simon.tnich-startup.click
+- Notes: See `notes.md` for what I changed + how I deployed the official `simon-html` example using `deployFiles.sh`.
+
