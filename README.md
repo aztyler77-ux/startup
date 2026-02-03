@@ -97,12 +97,27 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Visually appealing colors and layout. No overflowing elements.** - I did not complete this part of the deliverable.
-- [ ] **Use of a CSS framework** - I did not complete this part of the deliverable.
-- [ ] **All visual elements styled using CSS** - I did not complete this part of the deliverable.
-- [ ] **Responsive to window resizing using flexbox and/or grid display** - I did not complete this part of the deliverable.
-- [ ] **Use of a imported font** - I did not complete this part of the deliverable.
-- [ ] **Use of different types of selectors including element, class, ID, and pseudo selectors** - I did not complete this part of the deliverable.
+- [x] **Visually appealing colors and layout. No overflowing elements.**
+  I applied a consistent dark theme (background, panels, borders, and accent color) and verified the UI does not overflow on smaller screens. The Scores table is wrapped in a container that allows horizontal scrolling if needed.
+
+- [x] **Use of a CSS framework**
+  I included Bootstrap 5 via CDN and used Bootstrap utility classes alongside custom CSS in `main.css`.
+
+- [x] **All visual elements styled using CSS**
+  All pages share the same `main.css` styling for the header/nav/main/footer, cards, tables, and buttons. No inline `style=""` attributes are used.
+
+- [x] **Responsive to window resizing using flexbox and/or grid display**
+  The layout is responsive when resizing the window. The shared layout uses flexbox, the navigation wraps on small widths, and content is constrained to a max width.
+
+- [x] **Use of an imported font**
+  I imported the Inter font from Google Fonts in `main.css` using `@import` and applied it site-wide via `font-family`.
+
+- [x] **Use of different types of selectors including element, class, ID, and pseudo selectors**
+  `main.css` demonstrates element selectors (e.g., `body`, `label`, `table`), class selectors (e.g., `.app-shell`, `.cardish`, `.site-nav`), ID selectors (e.g., `#site-header`, `#site-footer`), and pseudo selectors (e.g., `a:hover`, `button:hover`).
+
+- Production Startup URL: https://startup.tnich-startup.click
+- Production Simon URL: https://simon.tnich-startup.click
+- Notes: See `notes.md` for additional implementation notes.
 
 ## 🚀 React part 1: Routing deliverable
 
