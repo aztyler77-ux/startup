@@ -17,3 +17,8 @@ Tables on the Scores page are wrapped in a container with horizontal overflow en
 
 Shared styling:
 All pages (index, play, scores, and about) share a consistent header, navigation bar, main layout container, and footer. The same main.css file is used across all pages to ensure a unified design.
+
+Additional CSS deliverable notes:
+- Used Bootstrap 5 via CDN plus shared `main.css` for consistent styling across pages.
+- Verified responsive flex layout, wrapped navigation, and table overflow handling.
+- Confirmed there are no inline `style=""` attributes in HTML pages.
