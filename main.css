@@ -158,3 +158,10 @@ img{
   border-radius: 14px;
   border:1px solid var(--border);
 }
+
+/* Accessibility: keyboard focus ring */
+.site-nav a:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(124, 92, 255, 0.9);
+  outline-offset: 2px;
+}
