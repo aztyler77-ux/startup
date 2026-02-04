@@ -175,3 +175,14 @@ button:focus-visible {
   outline: 2px solid rgba(124, 92, 255, 0.9);
   outline-offset: 2px;
 }
+
+/* Inputs: better placeholder contrast + focus ring */
+input::placeholder{
+  color: rgba(231,236,255,.55);
+}
+
+input:focus{
+  outline: 2px solid rgba(124, 92, 255, 0.9);
+  outline-offset: 2px;
+  border-color: rgba(124, 92, 255, 0.6);
+}
