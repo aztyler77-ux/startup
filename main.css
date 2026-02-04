@@ -231,3 +231,12 @@ tbody tr:nth-child(odd){
 tbody tr:hover{
   background: rgba(124,92,255,.08);
 }
+
+/* Tables: sticky header for easier scanning */
+thead th{
+  position: sticky;
+  top: 0;
+  background: rgba(18,26,51,.95);
+  backdrop-filter: blur(8px);
+  z-index: 1;
+}
