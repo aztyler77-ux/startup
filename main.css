@@ -186,3 +186,9 @@ input:focus{
   outline-offset: 2px;
   border-color: rgba(124, 92, 255, 0.6);
 }
+
+/* Buttons: pressed state feedback */
+button:active{
+  transform: translateY(1px);
+  background: rgba(124,92,255,.42);
+}
