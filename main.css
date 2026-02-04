@@ -248,3 +248,10 @@ thead th{
   max-height: 420px;
   object-fit: cover;
 }
+
+/* Print: make pages readable on paper */
+@media print{
+  body{ background: white; color: black; }
+  #site-header, #site-footer, .site-nav{ display: none; }
+  .cardish{ box-shadow: none; border: 1px solid #ddd; }
+}
