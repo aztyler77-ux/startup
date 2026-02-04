@@ -222,3 +222,12 @@ button:active{
     padding: .4rem .6rem;
   }
 }
+
+/* Tables: zebra striping + hover highlight */
+tbody tr:nth-child(odd){
+  background: rgba(255,255,255,.03);
+}
+
+tbody tr:hover{
+  background: rgba(124,92,255,.08);
+}
