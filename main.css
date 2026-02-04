@@ -192,3 +192,20 @@ button:active{
   transform: translateY(1px);
   background: rgba(124,92,255,.42);
 }
+
+/* Cards: subtle hover lift */
+.cardish{
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.cardish:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(0,0,0,.32);
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce){
+  .cardish{ transition: none; }
+  .cardish:hover{ transform: none; }
+  button:active{ transform: none; }
+}
