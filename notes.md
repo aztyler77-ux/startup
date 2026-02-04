@@ -22,3 +22,6 @@ Additional CSS deliverable notes:
 - Used Bootstrap 5 via CDN plus shared `main.css` for consistent styling across pages.
 - Verified responsive flex layout, wrapped navigation, and table overflow handling.
 - Confirmed there are no inline `style=""` attributes in HTML pages.
+
+
+CSS refinement pass (Feb 4): added spacing/radius tokens, improved form focus/placeholder, button active state, card hover + reduced-motion support, mobile header tweaks, table striping + sticky header, image sizing, and print styles.
