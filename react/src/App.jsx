@@ -7,19 +7,11 @@ import NotFound from './views/NotFound';
 
 function Nav() {
   return (
-    <nav className="site-nav">
-      <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : undefined)}>
-        Home
-      </NavLink>
-      <NavLink to="/play" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-        Play
-      </NavLink>
-      <NavLink to="/scores" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-        Scores
-      </NavLink>
-      <NavLink to="/about" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-        About
-      </NavLink>
+    <nav className="site-nav" aria-label="Primary">
+      <NavLink to="/" end>Home</NavLink>
+      <NavLink to="/play">Play</NavLink>
+      <NavLink to="/scores">Scores</NavLink>
+      <NavLink to="/about">About</NavLink>
     </nav>
   );
 }
@@ -31,7 +23,7 @@ export default function App() {
         <div className="app-shell">
           <div className="brand">
             <h1>Decision Helper</h1>
-            <div className="tagline">Turn chaos into a call you can live with.</div>
+            <span className="tagline">Make hard choices. Faster.</span>
           </div>
           <Nav />
         </div>
@@ -51,7 +43,12 @@ export default function App() {
 
       <footer id="site-footer">
         <div className="app-shell">
-          <small>© {new Date().getFullYear()} Decision Helper</small>
+          <small>
+            Built by Tyler Nichols •{' '}
+            <a href="https://github.com/aztyler77-ux/startup" target="_blank" rel="noreferrer">
+              GitHub Repo
+            </a>
+          </small>
         </div>
       </footer>
     </>
