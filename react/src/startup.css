@@ -3,12 +3,13 @@
 * { box-sizing: border-box; }
 
 :root{
-  --bg:#0b1020;
-  --panel:#121a33;
-  --text:#e7ecff;
-  --muted:#aab6e6;
+  /* Darker base + higher contrast */
+  --bg:#070a14;
+  --panel:#0f1730;
+  --text:#f2f5ff;
+  --muted:#c7d1ff;
   --accent:#7c5cff;
-  --border: rgba(255,255,255,.10);
+  --border: rgba(255,255,255,.14);
 
   --space-1: .25rem;
   --space-2: .5rem;
@@ -21,30 +22,52 @@
   --radius-pill: 999px;
 }
 
+html, body { height: 100%; }
+
 body{
   margin:0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background:
-    radial-gradient(1200px 800px at 20% 0%, rgba(124,92,255,0.25), transparent 55%),
-    radial-gradient(1000px 700px at 80% 10%, rgba(0,200,255,0.15), transparent 50%),
-    var(--bg);
-  color: var(--text);
 
+  /* Keep the “glow” but tone it down */
+  background:
+    radial-gradient(1100px 800px at 18% 0%, rgba(124,92,255,0.16), transparent 58%),
+    radial-gradient(900px 650px at 82% 10%, rgba(0,200,255,0.10), transparent 55%),
+    var(--bg);
+
+  color: var(--text);
   min-height:100vh;
   display:flex;
   flex-direction:column;
+
+  /* Make our overlay work predictably */
+  position: relative;
+}
+
+/* Contrast overlay so text never sits on raw glow */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  background: rgba(7,10,20,0.52);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root{
+  position: relative;
+  z-index: 1;
 }
 
 #site-header{
   border-bottom:1px solid var(--border);
-  background: rgba(18,26,51,.65);
+  background: rgba(10,14,28,.88);
   backdrop-filter: blur(10px);
 }
 
 #site-footer{
   margin-top:auto;
   border-top:1px solid var(--border);
-  background: rgba(18,26,51,.45);
+  background: rgba(10,14,28,.70);
 }
 
 .app-shell{
@@ -87,33 +110,50 @@ body{
 }
 
 .site-nav a:hover{
-  border-color: rgba(124,92,255,.7);
-  background: rgba(124,92,255,.12);
+  border-color: rgba(124,92,255,.85);
+  background: rgba(124,92,255,.14);
 }
 
 .site-nav a.active{
-  border-color: rgba(124,92,255,.9);
-  background: rgba(124,92,255,.22);
+  border-color: rgba(124,92,255,.95);
+  background: rgba(124,92,255,.26);
 }
 
 .site-main{ flex:1; }
 
+/* Title/subtitle readability */
 .page-title{
   margin: 0 0 .25rem 0;
-  font-size: 1.4rem;
+  font-size: 1.55rem;
+  text-shadow: 0 2px 14px rgba(0,0,0,.45);
 }
 
 .page-subtitle{
   margin: 0 0 1rem 0;
   color: var(--muted);
+  text-shadow: 0 2px 14px rgba(0,0,0,.45);
+
+  /* subtle backing so it never “washes out” */
+  display: inline-block;
+  padding: .35rem .6rem;
+  border-radius: 12px;
+  background: rgba(0,0,0,.22);
+  border: 1px solid rgba(255,255,255,.10);
 }
 
+/* Cards: more opaque = less haze */
 .cardish{
-  background: rgba(18,26,51,.70);
-  border:1px solid var(--border);
+  background: rgba(15,23,48,.92);
+  border:1px solid rgba(255,255,255,.16);
   border-radius: var(--radius-2);
   padding: var(--space-4);
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  box-shadow: 0 12px 34px rgba(0,0,0,.36);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.cardish:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 16px 46px rgba(0,0,0,.42);
 }
 
 label{
@@ -125,21 +165,35 @@ input{
   width: min(420px, 100%);
   padding: .6rem .75rem;
   border-radius: var(--radius-1);
-  border:1px solid var(--border);
-  background: rgba(0,0,0,.25);
+  border:1px solid rgba(255,255,255,.16);
+  background: rgba(0,0,0,.30);
   color: var(--text);
 }
 
+input::placeholder{
+  color: rgba(242,245,255,.60);
+}
+
+input:focus{
+  outline: 2px solid rgba(124, 92, 255, 0.9);
+  outline-offset: 2px;
+  border-color: rgba(124, 92, 255, 0.6);
+}
+
 button{
-  border:1px solid rgba(124,92,255,.7);
-  background: rgba(124,92,255,.22);
+  border:1px solid rgba(124,92,255,.75);
+  background: rgba(124,92,255,.26);
   color: var(--text);
   padding: .6rem .9rem;
   border-radius: var(--radius-1);
   cursor: pointer;
 }
 
-button:hover{ background: rgba(124,92,255,.35); }
+button:hover{ background: rgba(124,92,255,.38); }
+button:active{
+  transform: translateY(1px);
+  background: rgba(124,92,255,.50);
+}
 
 .table-wrap{
   width:100%;
@@ -154,7 +208,7 @@ table{
 
 th, td{
   padding: .75rem;
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid rgba(255,255,255,.14);
 }
 
 th{
@@ -166,7 +220,7 @@ img{
   max-width:100%;
   height:auto;
   border-radius: 14px;
-  border:1px solid var(--border);
+  border:1px solid rgba(255,255,255,.14);
 }
 
 /* Accessibility: keyboard focus ring */
@@ -174,33 +228,6 @@ img{
 button:focus-visible {
   outline: 2px solid rgba(124, 92, 255, 0.9);
   outline-offset: 2px;
-}
-
-/* Inputs: better placeholder contrast + focus ring */
-input::placeholder{
-  color: rgba(231,236,255,.55);
-}
-
-input:focus{
-  outline: 2px solid rgba(124, 92, 255, 0.9);
-  outline-offset: 2px;
-  border-color: rgba(124, 92, 255, 0.6);
-}
-
-/* Buttons: pressed state feedback */
-button:active{
-  transform: translateY(1px);
-  background: rgba(124,92,255,.42);
-}
-
-/* Cards: subtle hover lift */
-.cardish{
-  transition: transform 120ms ease, box-shadow 120ms ease;
-}
-
-.cardish:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 14px 40px rgba(0,0,0,.32);
 }
 
 /* Respect reduced-motion preferences */
@@ -218,40 +245,7 @@ button:active{
     gap: .25rem;
   }
 
-  .site-nav a{
-    padding: .4rem .6rem;
+  .page-subtitle{
+    display: block;
   }
-}
-
-/* Tables: zebra striping + hover highlight */
-tbody tr:nth-child(odd){
-  background: rgba(255,255,255,.03);
-}
-
-tbody tr:hover{
-  background: rgba(124,92,255,.08);
-}
-
-/* Tables: sticky header for easier scanning */
-thead th{
-  position: sticky;
-  top: 0;
-  background: rgba(18,26,51,.95);
-  backdrop-filter: blur(8px);
-  z-index: 1;
-}
-
-/* Images: center and constrain tall images */
-.cardish img{
-  display: block;
-  margin: 0 auto;
-  max-height: 420px;
-  object-fit: cover;
-}
-
-/* Print: make pages readable on paper */
-@media print{
-  body{ background: white; color: black; }
-  #site-header, #site-footer, .site-nav{ display: none; }
-  .cardish{ box-shadow: none; border: 1px solid #ddd; }
 }
