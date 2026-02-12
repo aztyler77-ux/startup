@@ -1,18 +1,13 @@
 export default function Play() {
   return (
     <>
-      <h2 className="page-title">Play</h2>
-      <p className="page-subtitle">Decision Builder (coming next phase).</p>
+      <h2 className="page-title">Build a Decision</h2>
+      <p className="page-subtitle">This page will allow users to create and evaluate decisions.</p>
 
-      <div className="cardish">
-        <label htmlFor="decisionName">Decision name</label>
-        <div style={{ marginTop: '.5rem' }}>
-          <input id="decisionName" placeholder="e.g., New laptop vs. keep current" />
-        </div>
-        <div style={{ marginTop: '1rem' }}>
-          <button>Create</button>
-        </div>
-      </div>
+      <section className="cardish">
+        <h3 className="h5 mb-2">Decision Builder (placeholder)</h3>
+        <p className="mb-0">Decision creation, weighting, and scoring will be implemented here.</p>
+      </section>
     </>
   );
 }
