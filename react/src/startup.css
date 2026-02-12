@@ -249,3 +249,30 @@ button:focus-visible {
     display: block;
   }
 }
+
+/* ===== Contrast enforcement (Bootstrap override insurance) ===== */
+:root { color-scheme: dark; }
+
+body { color: var(--text) !important; }
+
+.page-title { color: var(--text) !important; }
+.page-subtitle { color: var(--muted) !important; }
+
+.cardish,
+.cardish * {
+  color: var(--text) !important;
+}
+
+.cardish p,
+.cardish li,
+.cardish small,
+.cardish label {
+  color: var(--muted) !important;
+}
+
+/* Links inside cards/nav stay readable */
+a { color: var(--text); }
+a:hover { color: var(--text); }
+
+/* Table headers readable */
+th { color: var(--muted) !important; }
