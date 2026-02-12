@@ -6,36 +6,54 @@ import About from './views/About';
 import NotFound from './views/NotFound';
 
 function Nav() {
-  const linkStyle = ({ isActive }) => ({
-    fontWeight: isActive ? '700' : '400',
-    textDecoration: 'none',
-    marginRight: '0.75rem',
-  });
-
   return (
-    <nav style={{ padding: '0.75rem 0' }}>
-      <NavLink to="/" style={linkStyle} end>Home</NavLink>
-      <NavLink to="/play" style={linkStyle}>Play</NavLink>
-      <NavLink to="/scores" style={linkStyle}>Scores</NavLink>
-      <NavLink to="/about" style={linkStyle}>About</NavLink>
+    <nav className="site-nav">
+      <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : undefined)}>
+        Home
+      </NavLink>
+      <NavLink to="/play" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+        Play
+      </NavLink>
+      <NavLink to="/scores" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+        Scores
+      </NavLink>
+      <NavLink to="/about" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+        About
+      </NavLink>
     </nav>
   );
 }
 
 export default function App() {
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 1rem' }}>
-      <header>
-        <Nav />
+    <>
+      <header id="site-header">
+        <div className="app-shell">
+          <div className="brand">
+            <h1>Decision Helper</h1>
+            <div className="tagline">Turn chaos into a call you can live with.</div>
+          </div>
+          <Nav />
+        </div>
       </header>
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/play" element={<Play />} />
-        <Route path="/scores" element={<Scores />} />
-        <Route path="/about" element={<About />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </div>
+      <main className="site-main">
+        <div className="app-shell">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/play" element={<Play />} />
+            <Route path="/scores" element={<Scores />} />
+            <Route path="/about" element={<About />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+      </main>
+
+      <footer id="site-footer">
+        <div className="app-shell">
+          <small>© {new Date().getFullYear()} Decision Helper</small>
+        </div>
+      </footer>
+    </>
   );
 }
