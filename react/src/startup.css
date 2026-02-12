@@ -1,0 +1,257 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+* { box-sizing: border-box; }
+
+:root{
+  --bg:#0b1020;
+  --panel:#121a33;
+  --text:#e7ecff;
+  --muted:#aab6e6;
+  --accent:#7c5cff;
+  --border: rgba(255,255,255,.10);
+
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+
+  --radius-1: 12px;
+  --radius-2: 16px;
+  --radius-pill: 999px;
+}
+
+body{
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background:
+    radial-gradient(1200px 800px at 20% 0%, rgba(124,92,255,0.25), transparent 55%),
+    radial-gradient(1000px 700px at 80% 10%, rgba(0,200,255,0.15), transparent 50%),
+    var(--bg);
+  color: var(--text);
+
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+#site-header{
+  border-bottom:1px solid var(--border);
+  background: rgba(18,26,51,.65);
+  backdrop-filter: blur(10px);
+}
+
+#site-footer{
+  margin-top:auto;
+  border-top:1px solid var(--border);
+  background: rgba(18,26,51,.45);
+}
+
+.app-shell{
+  max-width: 1000px;
+  width:100%;
+  margin:0 auto;
+  padding: var(--space-4);
+}
+
+.brand{
+  display:flex;
+  align-items:baseline;
+  gap:.75rem;
+}
+
+.brand h1{
+  margin:0;
+  font-size:1.35rem;
+  letter-spacing:.2px;
+}
+
+.brand .tagline{
+  color: var(--muted);
+  font-size:.95rem;
+}
+
+.site-nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  margin-top:.75rem;
+}
+
+.site-nav a{
+  text-decoration:none;
+  color: var(--text);
+  border:1px solid var(--border);
+  padding:.45rem .7rem;
+  border-radius: var(--radius-pill);
+}
+
+.site-nav a:hover{
+  border-color: rgba(124,92,255,.7);
+  background: rgba(124,92,255,.12);
+}
+
+.site-nav a.active{
+  border-color: rgba(124,92,255,.9);
+  background: rgba(124,92,255,.22);
+}
+
+.site-main{ flex:1; }
+
+.page-title{
+  margin: 0 0 .25rem 0;
+  font-size: 1.4rem;
+}
+
+.page-subtitle{
+  margin: 0 0 1rem 0;
+  color: var(--muted);
+}
+
+.cardish{
+  background: rgba(18,26,51,.70);
+  border:1px solid var(--border);
+  border-radius: var(--radius-2);
+  padding: var(--space-4);
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+
+label{
+  color: var(--muted);
+  font-weight: 600;
+}
+
+input{
+  width: min(420px, 100%);
+  padding: .6rem .75rem;
+  border-radius: var(--radius-1);
+  border:1px solid var(--border);
+  background: rgba(0,0,0,.25);
+  color: var(--text);
+}
+
+button{
+  border:1px solid rgba(124,92,255,.7);
+  background: rgba(124,92,255,.22);
+  color: var(--text);
+  padding: .6rem .9rem;
+  border-radius: var(--radius-1);
+  cursor: pointer;
+}
+
+button:hover{ background: rgba(124,92,255,.35); }
+
+.table-wrap{
+  width:100%;
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse: collapse;
+  min-width: 520px;
+}
+
+th, td{
+  padding: .75rem;
+  border-bottom:1px solid var(--border);
+}
+
+th{
+  text-align:left;
+  color: var(--muted);
+}
+
+img{
+  max-width:100%;
+  height:auto;
+  border-radius: 14px;
+  border:1px solid var(--border);
+}
+
+/* Accessibility: keyboard focus ring */
+.site-nav a:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(124, 92, 255, 0.9);
+  outline-offset: 2px;
+}
+
+/* Inputs: better placeholder contrast + focus ring */
+input::placeholder{
+  color: rgba(231,236,255,.55);
+}
+
+input:focus{
+  outline: 2px solid rgba(124, 92, 255, 0.9);
+  outline-offset: 2px;
+  border-color: rgba(124, 92, 255, 0.6);
+}
+
+/* Buttons: pressed state feedback */
+button:active{
+  transform: translateY(1px);
+  background: rgba(124,92,255,.42);
+}
+
+/* Cards: subtle hover lift */
+.cardish{
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.cardish:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(0,0,0,.32);
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce){
+  .cardish{ transition: none; }
+  .cardish:hover{ transform: none; }
+  button:active{ transform: none; }
+}
+
+/* Mobile: tighten header + nav spacing */
+@media (max-width: 520px){
+  .brand{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .25rem;
+  }
+
+  .site-nav a{
+    padding: .4rem .6rem;
+  }
+}
+
+/* Tables: zebra striping + hover highlight */
+tbody tr:nth-child(odd){
+  background: rgba(255,255,255,.03);
+}
+
+tbody tr:hover{
+  background: rgba(124,92,255,.08);
+}
+
+/* Tables: sticky header for easier scanning */
+thead th{
+  position: sticky;
+  top: 0;
+  background: rgba(18,26,51,.95);
+  backdrop-filter: blur(8px);
+  z-index: 1;
+}
+
+/* Images: center and constrain tall images */
+.cardish img{
+  display: block;
+  margin: 0 auto;
+  max-height: 420px;
+  object-fit: cover;
+}
+
+/* Print: make pages readable on paper */
+@media print{
+  body{ background: white; color: black; }
+  #site-header, #site-footer, .site-nav{ display: none; }
+  .cardish{ box-shadow: none; border: 1px solid #ddd; }
+}
