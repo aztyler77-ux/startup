@@ -25,3 +25,8 @@ Additional CSS deliverable notes:
 
 
 CSS refinement pass (Feb 4): added spacing/radius tokens, improved form focus/placeholder, button active state, card hover + reduced-motion support, mobile header tweaks, table striping + sticky header, image sizing, and print styles.
+
+## React P1 prep (Feb 12, 2026)
+- Installed Node.js 20 + npm on server for Vite/React builds.
+- Migrated Caddy roots for simon/startup to /home/ubuntu/services/<service>/public (course deploy target).
+- Fixed permissions on /home/ubuntu so Caddy can traverse and serve files (resolved HTTP 403).
