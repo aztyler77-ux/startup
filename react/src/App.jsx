@@ -6,12 +6,14 @@ import About from './views/About';
 import NotFound from './views/NotFound';
 
 function Nav() {
+  const navClass = ({ isActive }) => (isActive ? 'active' : undefined);
+
   return (
     <nav className="site-nav" aria-label="Primary">
-      <NavLink to="/" end>Home</NavLink>
-      <NavLink to="/play">Play</NavLink>
-      <NavLink to="/scores">Scores</NavLink>
-      <NavLink to="/about">About</NavLink>
+      <NavLink to="/" end className={navClass}>Home</NavLink>
+      <NavLink to="/play" className={navClass}>Play</NavLink>
+      <NavLink to="/scores" className={navClass}>Scores</NavLink>
+      <NavLink to="/about" className={navClass}>About</NavLink>
     </nav>
   );
 }
