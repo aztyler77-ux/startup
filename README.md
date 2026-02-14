@@ -123,9 +123,12 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Bundled using Vite** - I did not complete this part of the deliverable.
-- [ ] **Components** - I did not complete this part of the deliverable.
-- [ ] **Router** - I did not complete this part of the deliverable.
+- [x] **Bundled using Vite** - Created a Vite + React project in the `react/` directory and built a production bundle (`npm run build`) for deployment.
+- [x] **Components** - Converted the Startup pages into React components/views (Home, Play, Scores, About) with a shared app shell (header/nav/footer) and reusable layout/styling.
+- [x] **Router** - Implemented client-side routing with React Router for `/`, `/play`, `/scores`, `/about`, plus a fallback NotFound route. Verified deep links and refresh on routes load correctly as an SPA.
+
+- Production Startup URL: https://startup.tnich-startup.click
+- Notes: The React app lives in `react/` and the built `dist/` output is what is deployed to the startup subdomain.
 
 ## 🚀 React part 2: Reactivity deliverable
 
