@@ -42,3 +42,13 @@ CSS refinement pass (Feb 4): added spacing/radius tokens, improved form focus/pl
 - SPA deep links returning index.html with HTTP 200 is expected/desired behavior when React Router handles routing client-side.
 - Terminal paste mistakes can look catastrophic, but `tail` + `npm run build` is the fastest sanity check for file integrity.
 - Frequent small commits after each feature chunk makes recovery and TA verification much easier.
+
+## 2026-02-26 - Simon React prerequisite polish
+- Observed Simon React nav links rendering without spacing (e.g., "HomeLoginPlayScoresAbout").
+- Verified Simon is serving a Vite/React build (hashed assets).
+- Applied a minimal CSS override in production to add spacing/padding for `.site-nav a`:
+  - File: ~/services/simon/public/assets/index-CNHYs4t-.css
+  - Patch:
+    - `.site-nav { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; }`
+    - `.site-nav a { padding:.25rem .45rem; }`
+- Verified the patch is live by fetching the deployed CSS and confirming the appended rules appear.
