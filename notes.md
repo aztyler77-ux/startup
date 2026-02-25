@@ -67,3 +67,7 @@ CSS refinement pass (Feb 4): added spacing/radius tokens, improved form focus/pl
 - startup /scores:  200
 - startup /about:  200
 - simon /:  200
+
+### Startup production bundle check (2026-02-26)
+- JS bundle:  /assets/index-y-VksJCk.js
+- CSS bundle: /assets/index-D-Cvkrpb.css
