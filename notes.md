@@ -52,3 +52,18 @@ CSS refinement pass (Feb 4): added spacing/radius tokens, improved form focus/pl
     - `.site-nav { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; }`
     - `.site-nav a { padding:.25rem .45rem; }`
 - Verified the patch is live by fetching the deployed CSS and confirming the appended rules appear.
+
+## 2026-02-26 - React P2 final verification (pre-submission)
+- Verified git state clean before changes and commits were made incrementally today.
+- Startup React build succeeds (`npm run build`) and the `dist/` output deploys to `~/services/startup/public`.
+- Startup production routes respond with HTTP 200:
+  - `/`, `/play`, `/scores`, `/about`
+- Verified live site serves the current hashed Vite bundle and assets (DecisionHelper.png).
+- Simon prerequisite verified live at https://simon.tnich-startup.click (React/Vite hashed assets).
+
+### Curl receipts (2026-02-26)
+- startup /:  200
+- startup /play:  200
+- startup /scores:  200
+- startup /about:  200
+- simon /:  200
