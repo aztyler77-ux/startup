@@ -1,12 +1,23 @@
-import { NavLink, Route, Routes } from 'react-router-dom';
-import Home from './views/Home';
-import Play from './views/Play';
-import Scores from './views/Scores';
-import About from './views/About';
-import NotFound from './views/NotFound';
+import { useEffect, useState } from "react";
+import { NavLink, Route, Routes } from "react-router-dom";
+import Home from "./views/Home";
+import Play from "./views/Play";
+import Scores from "./views/Scores";
+import About from "./views/About";
+import NotFound from "./views/NotFound";
+
+const USER_STORAGE_KEY = "decisionHelper.userName";
+
+function readStoredUserName() {
+  try {
+    return localStorage.getItem(USER_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+}
 
 function Nav() {
-  const navClass = ({ isActive }) => (isActive ? 'active' : undefined);
+  const navClass = ({ isActive }) => (isActive ? "active" : undefined);
 
   return (
     <nav className="site-nav" aria-label="Primary">
@@ -19,6 +30,30 @@ function Nav() {
 }
 
 export default function App() {
+  const [userName, setUserName] = useState(readStoredUserName);
+
+  useEffect(() => {
+    try {
+      if (userName) {
+        localStorage.setItem(USER_STORAGE_KEY, userName);
+      } else {
+        localStorage.removeItem(USER_STORAGE_KEY);
+      }
+    } catch {
+      // localStorage unavailable; ignore for now
+    }
+  }, [userName]);
+
+  function handleLogin(nextUserName) {
+    const cleaned = String(nextUserName ?? "").trim();
+    if (!cleaned) return;
+    setUserName(cleaned);
+  }
+
+  function handleLogout() {
+    setUserName("");
+  }
+
   return (
     <>
       <header id="site-header">
@@ -27,6 +62,31 @@ export default function App() {
             <h1>Decision Helper</h1>
             <span className="tagline">Make hard choices. Faster.</span>
           </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: ".75rem",
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
+            }}
+          >
+            <small style={{ color: "var(--muted)" }}>
+              Logged in as: <strong style={{ color: "var(--text)" }}>{userName || "guest"}</strong>
+            </small>
+
+            {userName ? (
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-light"
+                onClick={handleLogout}
+              >
+                Log out
+              </button>
+            ) : null}
+          </div>
+
           <Nav />
         </div>
       </header>
@@ -34,7 +94,7 @@ export default function App() {
       <main className="site-main">
         <div className="app-shell">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home userName={userName} onLogin={handleLogin} />} />
             <Route path="/play" element={<Play />} />
             <Route path="/scores" element={<Scores />} />
             <Route path="/about" element={<About />} />
@@ -46,7 +106,7 @@ export default function App() {
       <footer id="site-footer">
         <div className="app-shell">
           <small>
-            Built by Tyler Nichols •{' '}
+            Built by Tyler Nichols •{" "}
             <a href="https://github.com/aztyler77-ux/startup" target="_blank" rel="noreferrer">
               GitHub Repo
             </a>
