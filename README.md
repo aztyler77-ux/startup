@@ -63,7 +63,7 @@ I am going to use the required technologies in the following ways.
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Server deployed and accessible with custom domain name** - [My server link](https://yourdomainnamehere.click).
+- [x] **Server deployed and accessible with custom domain name** - Server is deployed on AWS EC2 and accessible at https://tnich-startup.click (subdomains: https://startup.tnich-startup.click and https://simon.tnich-startup.click).
 
 ## 🚀 HTML deliverable
 
