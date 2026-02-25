@@ -66,6 +66,15 @@ export default function Scores() {
     setHistory(safeReadJson(HISTORY_KEY, []));
   }, []);
 
+  // Auto-refresh history when returning to this tab/window
+  useEffect(() => {
+    function onFocus() {
+      setHistory(safeReadJson(HISTORY_KEY, []));
+    }
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, []);
+
   useEffect(() => {
     const starter = {
       id: makeId(),
