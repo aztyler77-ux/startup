@@ -171,3 +171,35 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 - Production Simon URL: https://simon.tnich-startup.click
 - Notes: See `notes.md` for what I changed + how I deployed the official `simon-html` example using `deployFiles.sh`.
 
+
+## React Part 2: Reactivity (Startup) - Feb 25, 2026
+
+Production URL:
+- https://startup.tnich-startup.click
+
+What I added/changed for this deliverable:
+- Implemented React interactivity across the Startup app using multiple components and routed views (Home, Play, Scores, About, NotFound).
+- Added mock login/session behavior on the Home page using React state and browser localStorage (`decisionHelper.userName`).
+- Added a reactive Decision Builder on the Play page:
+  - create/edit/remove options
+  - enter a decision title
+  - score options (1-10)
+  - calculate a winner and ranked results table
+- Mocked database persistence using localStorage:
+  - Play page draft persistence (`decisionHelper.playDraft`)
+  - saved decision history (`decisionHelper.history`)
+- Added a reactive Scores page that:
+  - loads saved decision history from localStorage
+  - refreshes/clears local mock history
+  - displays a mock “Live Updates” feed
+- Mocked WebSocket-style updates on the Scores page using `setInterval` and React `useEffect` cleanup.
+- Used React `useState` and `useEffect` hooks for component state, persistence, timed updates, and lifecycle cleanup.
+- Kept my name visible in the app footer and kept a prominent GitHub repo link visible on the app (home page + footer).
+- Built with Vite and deployed the updated production build to the startup subdomain.
+- Verified deployment with curl:
+  - root and deep links (`/play`, `/scores`, `/about`) return HTTP 200
+  - production HTML serves the current hashed JS/CSS bundle
+  - deployed JS bundle contains the new React P2 mock-interactivity strings
+
+Notes:
+- Future deliverables will replace localStorage mocks with the real service/database/websocket implementations.

@@ -30,3 +30,15 @@ CSS refinement pass (Feb 4): added spacing/radius tokens, improved form focus/pl
 - Installed Node.js 20 + npm on server for Vite/React builds.
 - Migrated Caddy roots for simon/startup to /home/ubuntu/services/<service>/public (course deploy target).
 - Fixed permissions on /home/ubuntu so Caddy can traverse and serve files (resolved HTTP 403).
+
+## React P2 (Reactivity) notes - 2026-02-25
+
+- Mocking future deliverables cleanly made React P2 much easier to reason about:
+  - localStorage for user/session + persisted history
+  - setInterval for fake live updates / websocket-style behavior
+- `useEffect` is doing two important jobs now:
+  1) sync state to localStorage
+  2) manage lifecycle/timer setup + cleanup
+- SPA deep links returning index.html with HTTP 200 is expected/desired behavior when React Router handles routing client-side.
+- Terminal paste mistakes can look catastrophic, but `tail` + `npm run build` is the fastest sanity check for file integrity.
+- Frequent small commits after each feature chunk makes recovery and TA verification much easier.
