@@ -60,6 +60,12 @@ export default function Play() {
     safeWriteJson(DRAFT_KEY, { decisionTitle, options });
   }, [decisionTitle, options]);
 
+  // Clear stale recommendation when inputs change
+  useEffect(() => {
+    setResult(null);
+    setSaveMsg("");
+  }, [decisionTitle, options]);
+
   function addOption() {
     const cleaned = newOptionName.trim();
     if (!cleaned) {
