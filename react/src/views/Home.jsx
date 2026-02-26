@@ -31,7 +31,6 @@ export default function Home({ userName, onLogin }) {
       </p>
 
       <div className="cardish" style={{ marginBottom: "1rem" }}>
-        <img src="/DecisionHelper.png" alt="Decision Helper" />
         <p style={{ marginTop: ".75rem", color: "var(--muted)" }}>
           Start a new decision build, or check your past results.
         </p>
