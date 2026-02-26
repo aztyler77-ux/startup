@@ -27,53 +27,74 @@ function makeId() {
 }
 
 function makeOption(name = "") {
-  return {
-    id: makeId(),
-    name,
-    score: 5,
-  };
+  return { id: makeId(), name };
 }
 
 function makeCriterion(name = "") {
-  return {
-    id: makeId(),
-    name,
-    weight: 1,
-  };
+  return { id: makeId(), name, weight: 1 };
+}
+
+function clampScore(n) {
+  const num = Number(n);
+  if (Number.isNaN(num)) return 0;
+  return Math.max(0, Math.min(10, num));
 }
 
 export default function Play() {
   const initialDraft = useMemo(() => {
     const raw = safeReadJson(DRAFT_KEY, null);
-
-    // Backward-compatible draft shape
     const base = raw && typeof raw === "object" ? raw : null;
 
     const decisionTitle = base?.decisionTitle ?? "";
+
     const options =
       Array.isArray(base?.options) && base.options.length >= 2
-        ? base.options.map((opt) => ({
+        ? base.options.map((opt, idx) => ({
             id: opt.id || makeId(),
-            name: opt.name || "",
-            score: Number.isFinite(Number(opt.score)) ? Number(opt.score) : 5,
+            name: String(opt.name || "").trim() || `Option ${idx + 1}`,
           }))
         : [makeOption("Option A"), makeOption("Option B")];
 
     const criteria =
       Array.isArray(base?.criteria) && base.criteria.length >= 1
-        ? base.criteria.map((c) => ({
+        ? base.criteria.map((c, idx) => ({
             id: c.id || makeId(),
-            name: String(c.name || "").trim() || "Criterion",
+            name: String(c.name || "").trim() || `Criterion ${idx + 1}`,
             weight: Number.isFinite(Number(c.weight)) ? Number(c.weight) : 1,
           }))
-        : [makeCriterion("Overall")];
+        : [makeCriterion("Cost"), makeCriterion("Benefit")];
 
-    return { decisionTitle, options, criteria };
+    // scores[optionId][criterionId] = 0..10
+    let scores = {};
+    if (base?.scores && typeof base.scores === "object") {
+      scores = base.scores;
+    } else {
+      // Backward-compat: if old draft had per-option "score", map it into first criterion
+      const firstCrit = criteria[0];
+      for (const opt of options) {
+        const legacy = base?.options?.find?.((o) => o?.id === opt.id)?.score;
+        const v = clampScore(legacy ?? 5);
+        scores[opt.id] = { [firstCrit.id]: v };
+      }
+    }
+
+    // Ensure every option has every criterion key
+    const normalizedScores = {};
+    for (const opt of options) {
+      normalizedScores[opt.id] = {};
+      for (const c of criteria) {
+        const existing = scores?.[opt.id]?.[c.id];
+        normalizedScores[opt.id][c.id] = clampScore(existing ?? 5);
+      }
+    }
+
+    return { decisionTitle, options, criteria, scores: normalizedScores };
   }, []);
 
   const [decisionTitle, setDecisionTitle] = useState(initialDraft.decisionTitle || "");
   const [criteria, setCriteria] = useState(initialDraft.criteria);
   const [options, setOptions] = useState(initialDraft.options);
+  const [scores, setScores] = useState(initialDraft.scores);
 
   const [newCriterionName, setNewCriterionName] = useState("");
   const [newOptionName, setNewOptionName] = useState("");
@@ -81,15 +102,38 @@ export default function Play() {
   const [result, setResult] = useState(null);
   const [saveMsg, setSaveMsg] = useState("");
 
+  // Persist draft (mock DB)
   useEffect(() => {
-    safeWriteJson(DRAFT_KEY, { decisionTitle, criteria, options });
-  }, [decisionTitle, criteria, options]);
+    safeWriteJson(DRAFT_KEY, { decisionTitle, criteria, options, scores });
+  }, [decisionTitle, criteria, options, scores]);
 
   // Clear stale recommendation when inputs change
   useEffect(() => {
     setResult(null);
     setSaveMsg("");
-  }, [decisionTitle, criteria, options]);
+  }, [decisionTitle, criteria, options, scores]);
+
+  // Computed totals + ranking
+  const totals = useMemo(() => {
+    const map = {};
+    for (const opt of options) {
+      let total = 0;
+      for (const c of criteria) {
+        const w = Number(c.weight);
+        const weight = Number.isFinite(w) ? w : 1;
+        const v = clampScore(scores?.[opt.id]?.[c.id] ?? 0);
+        total += weight * v;
+      }
+      map[opt.id] = total;
+    }
+    return map;
+  }, [options, criteria, scores]);
+
+  const ranking = useMemo(() => {
+    return [...options]
+      .map((o) => ({ ...o, total: totals[o.id] ?? 0 }))
+      .sort((a, b) => b.total - a.total);
+  }, [options, totals]);
 
   function addCriterion() {
     const cleaned = newCriterionName.trim();
@@ -97,7 +141,18 @@ export default function Play() {
       setErrorMsg("Enter a name before adding a criterion.");
       return;
     }
-    setCriteria((prev) => [...prev, makeCriterion(cleaned)]);
+
+    const newC = makeCriterion(cleaned);
+    setCriteria((prev) => [...prev, newC]);
+
+    setScores((prev) => {
+      const next = { ...(prev || {}) };
+      for (const opt of options) {
+        next[opt.id] = { ...(next[opt.id] || {}), [newC.id]: 5 };
+      }
+      return next;
+    });
+
     setNewCriterionName("");
     setErrorMsg("");
   }
@@ -114,6 +169,16 @@ export default function Play() {
       }
       return prev.filter((c) => c.id !== id);
     });
+
+    setScores((prev) => {
+      const next = { ...(prev || {}) };
+      for (const optId of Object.keys(next)) {
+        const row = { ...(next[optId] || {}) };
+        delete row[id];
+        next[optId] = row;
+      }
+      return next;
+    });
   }
 
   function addOption() {
@@ -123,7 +188,18 @@ export default function Play() {
       return;
     }
 
-    setOptions((prev) => [...prev, makeOption(cleaned)]);
+    const newO = makeOption(cleaned);
+    setOptions((prev) => [...prev, newO]);
+
+    setScores((prev) => {
+      const next = { ...(prev || {}) };
+      next[newO.id] = {};
+      for (const c of criteria) {
+        next[newO.id][c.id] = 5;
+      }
+      return next;
+    });
+
     setNewOptionName("");
     setErrorMsg("");
   }
@@ -136,72 +212,78 @@ export default function Play() {
       }
       return prev.filter((opt) => opt.id !== id);
     });
+
+    setScores((prev) => {
+      const next = { ...(prev || {}) };
+      delete next[id];
+      return next;
+    });
   }
 
   function updateOption(id, patch) {
     setOptions((prev) => prev.map((opt) => (opt.id === id ? { ...opt, ...patch } : opt)));
   }
 
+  function setCellScore(optionId, criterionId, value) {
+    setScores((prev) => ({
+      ...(prev || {}),
+      [optionId]: {
+        ...((prev || {})[optionId] || {}),
+        [criterionId]: clampScore(value),
+      },
+    }));
+  }
+
   function calculateRecommendation() {
     setSaveMsg("");
     setErrorMsg("");
 
-    const normalizedCriteria = criteria.map((c) => ({
-      ...c,
-      name: String(c.name || "").trim(),
-      weight: Number(c.weight),
-    }));
-
-    const normalizedOptions = options.map((opt) => ({
-      ...opt,
-      name: String(opt.name || "").trim(),
-      score: Number(opt.score),
-    }));
-
-    if (!decisionTitle.trim()) {
+    const title = decisionTitle.trim();
+    if (!title) {
       setErrorMsg("Add a decision title first.");
       return;
     }
 
-    if (normalizedCriteria.length < 1) {
-      setErrorMsg("Add at least one criterion.");
-      return;
-    }
-
-    if (normalizedCriteria.some((c) => !c.name)) {
-      setErrorMsg("Every criterion needs a name.");
-      return;
-    }
-
-    if (normalizedCriteria.some((c) => Number.isNaN(c.weight) || c.weight < 0)) {
-      setErrorMsg("Criterion weights must be 0 or greater.");
-      return;
-    }
-
-    if (normalizedOptions.length < 2) {
+    if (options.length < 2) {
       setErrorMsg("Add at least two options.");
       return;
     }
-
-    if (normalizedOptions.some((opt) => !opt.name)) {
+    if (options.some((o) => !String(o.name || "").trim())) {
       setErrorMsg("Every option needs a name.");
       return;
     }
 
-    if (normalizedOptions.some((opt) => Number.isNaN(opt.score) || opt.score < 1 || opt.score > 10)) {
-      setErrorMsg("Scores must be numbers from 1 to 10.");
+    if (criteria.length < 1) {
+      setErrorMsg("Add at least one criterion.");
+      return;
+    }
+    if (criteria.some((c) => !String(c.name || "").trim())) {
+      setErrorMsg("Every criterion needs a name.");
+      return;
+    }
+    if (criteria.some((c) => Number(c.weight) < 0 || Number.isNaN(Number(c.weight)))) {
+      setErrorMsg("Criterion weights must be 0 or greater.");
       return;
     }
 
-    // NOTE: For now this uses the single option score.
-    // Next commit will switch to option-by-criterion scoring.
-    const ranked = [...normalizedOptions].sort((a, b) => b.score - a.score);
+    // Validate all score cells
+    for (const opt of options) {
+      for (const c of criteria) {
+        const v = Number(scores?.[opt.id]?.[c.id]);
+        if (Number.isNaN(v) || v < 0 || v > 10) {
+          setErrorMsg("All grid scores must be numbers from 0 to 10.");
+          return;
+        }
+      }
+    }
+
+    const ranked = ranking;
     const winner = ranked[0];
     const runnerUp = ranked[1];
-    const margin = runnerUp ? winner.score - runnerUp.score : winner.score;
+    const margin = runnerUp ? winner.total - runnerUp.total : winner.total;
 
     const nextResult = {
-      title: decisionTitle.trim(),
+      title,
       ranked,
       winner,
       runnerUp,
@@ -211,14 +293,21 @@ export default function Play() {
 
     setResult(nextResult);
 
+    // Save record compatible with Scores.jsx table
     const historyRecord = {
       id: makeId(),
-      title: nextResult.title,
-      winner: winner.name,
-      winnerScore: winner.score,
-      options: ranked.map((opt) => ({ name: opt.name, score: opt.score })),
+      title,
+      winner: winner?.name ?? "—",
+      winnerScore: winner?.total ?? 0,
       createdAt: nextResult.calculatedAt,
-      summary: `${winner.name} won by ${margin} point${margin === 1 ? "" : "s"}.`,
+      summary: runnerUp
+        ? `${winner.name} won by ${margin} point${margin === 1 ? "" : "s"}.`
+        : `${winner.name} won.`,
+      // extra fields for future use (Scores.jsx ignores them safely)
+      criteria,
+      options,
+      scores,
+      totals,
     };
 
     const existingHistory = safeReadJson(HISTORY_KEY, []);
@@ -230,13 +319,27 @@ export default function Play() {
 
   function resetBuilder() {
     setDecisionTitle("");
-    setCriteria([makeCriterion("Overall")]);
-    setOptions([makeOption("Option A"), makeOption("Option B")]);
+    const freshCriteria = [makeCriterion("Cost"), makeCriterion("Benefit")];
+    const freshOptions = [makeOption("Option A"), makeOption("Option B")];
+
+    const freshScores = {};
+    for (const o of freshOptions) {
+      freshScores[o.id] = {};
+      for (const c of freshCriteria) {
+        freshScores[o.id][c.id] = 5;
+      }
+    }
+
+    setCriteria(freshCriteria);
+    setOptions(freshOptions);
+    setScores(freshScores);
+
     setNewCriterionName("");
     setNewOptionName("");
     setErrorMsg("");
     setResult(null);
     setSaveMsg("");
+
     try {
       localStorage.removeItem(DRAFT_KEY);
     } catch {
@@ -248,7 +351,7 @@ export default function Play() {
     <>
       <h2 className="page-title">Decision Builder</h2>
       <p className="page-subtitle">
-        P2 interactive mock: build a decision, define criteria, score options, get a recommendation, and save results locally.
+        Full decision helper: define criteria + weights, score each option per criterion, get a weighted recommendation, and save it locally.
       </p>
 
       <div className="cardish" style={{ marginBottom: "1rem" }}>
@@ -370,7 +473,7 @@ export default function Play() {
               key={opt.id}
               style={{
                 display: "grid",
-                gridTemplateColumns: "1.5fr .75fr auto",
+                gridTemplateColumns: "1.5fr auto",
                 gap: ".75rem",
                 alignItems: "end",
                 padding: ".75rem",
@@ -392,21 +495,6 @@ export default function Play() {
                 />
               </div>
 
-              <div>
-                <label htmlFor={`opt-score-${opt.id}`} style={{ display: "block", marginBottom: ".35rem" }}>
-                  Score (1–10)
-                </label>
-                <input
-                  id={`opt-score-${opt.id}`}
-                  type="number"
-                  min="1"
-                  max="10"
-                  step="1"
-                  value={opt.score}
-                  onChange={(e) => updateOption(opt.id, { score: e.target.value })}
-                />
-              </div>
-
               <button
                 type="button"
                 className="btn btn-outline-light"
@@ -421,7 +509,52 @@ export default function Play() {
       </div>
 
       <div className="cardish" style={{ marginBottom: "1rem" }}>
-        <h3 style={{ marginTop: 0 }}>4) Calculate recommendation</h3>
+        <h3 style={{ marginTop: 0 }}>4) Score grid (0–10)</h3>
+        <p style={{ color: "var(--muted)", marginTop: ".25rem" }}>
+          Score each option for each criterion. Totals are weighted by criterion weight.
+        </p>
+
+        <div style={{ overflowX: "auto" }}>
+          <table className="table table-dark table-striped align-middle" style={{ marginBottom: 0 }}>
+            <thead>
+              <tr>
+                <th>Option</th>
+                {criteria.map((c) => (
+                  <th key={c.id}>
+                    {c.name}
+                    <div style={{ fontSize: ".85em", color: "var(--muted)" }}>w={Number(c.weight) || 0}</div>
+                  </th>
+                ))}
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {options.map((o) => (
+                <tr key={o.id}>
+                  <td style={{ fontWeight: 600 }}>{o.name}</td>
+                  {criteria.map((c) => (
+                    <td key={c.id}>
+                      <input
+                        type="number"
+                        min="0"
+                        max="10"
+                        step="1"
+                        value={scores?.[o.id]?.[c.id] ?? 5}
+                        onChange={(e) => setCellScore(o.id, c.id, e.target.value)}
+                        style={{ width: "90px" }}
+                      />
+                    </td>
+                  ))}
+                  <td>{totals[o.id] ?? 0}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="cardish" style={{ marginBottom: "1rem" }}>
+        <h3 style={{ marginTop: 0 }}>5) Calculate recommendation</h3>
 
         {errorMsg ? (
           <div role="alert" style={{ color: "#ffb4b4", marginBottom: ".75rem" }}>
@@ -445,8 +578,8 @@ export default function Play() {
         <div className="cardish">
           <h3 style={{ marginTop: 0 }}>Recommendation</h3>
           <p style={{ marginBottom: ".5rem" }}>
-            For <strong>{result.title}</strong>, the top option is <strong>{result.winner.name}</strong> with a score of{" "}
-            <strong>{result.winner.score}</strong>.
+            For <strong>{result.title}</strong>, the top option is <strong>{result.winner.name}</strong> with a total of{" "}
+            <strong>{result.winner.total}</strong>.
           </p>
 
           <p style={{ color: "var(--muted)" }}>
@@ -461,7 +594,7 @@ export default function Play() {
                 <tr>
                   <th>Rank</th>
                   <th>Option</th>
-                  <th>Score</th>
+                  <th>Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -469,7 +602,7 @@ export default function Play() {
                   <tr key={opt.id}>
                     <td>{index + 1}</td>
                     <td>{opt.name}</td>
-                    <td>{opt.score}</td>
+                    <td>{opt.total}</td>
                   </tr>
                 ))}
               </tbody>
