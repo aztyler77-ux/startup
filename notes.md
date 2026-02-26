@@ -71,3 +71,5 @@ CSS refinement pass (Feb 4): added spacing/radius tokens, improved form focus/pl
 ### Startup production bundle check (2026-02-26)
 - JS bundle:  /assets/index-y-VksJCk.js
 - CSS bundle: /assets/index-D-Cvkrpb.css
+
+Feb 26 2026: React P2 patch for TA feedback — removed Home hero image and updated Play to criteria + weight + scoring grid (option×criterion) with weighted totals; deployed bundle index-TgAf31x1.js.
