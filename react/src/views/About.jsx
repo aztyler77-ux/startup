@@ -71,7 +71,6 @@ export default function About() {
       </p>
 
       <div className="cardish" style={{ marginBottom: "1rem" }}>
-        <img src="/DecisionHelper.png" alt="Decision Helper logo" />
         <h3 style={{ marginTop: "1rem" }}>How it works</h3>
         <ol style={{ marginBottom: 0, color: "var(--muted)" }}>
           <li>Add the options you are deciding between.</li>
