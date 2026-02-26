@@ -73,3 +73,5 @@ CSS refinement pass (Feb 4): added spacing/radius tokens, improved form focus/pl
 - CSS bundle: /assets/index-D-Cvkrpb.css
 
 Feb 26 2026: React P2 patch for TA feedback — removed Home hero image and updated Play to criteria + weight + scoring grid (option×criterion) with weighted totals; deployed bundle index-TgAf31x1.js.
+
+2026-02-26 23:49 UTC: React P2 TA patch — added criteria+weight scoring grid w/ weighted totals; removed Home/About images per TA feedback; deployed /assets/index-De-VE57_.js /assets/index-D-Cvkrpb.css
