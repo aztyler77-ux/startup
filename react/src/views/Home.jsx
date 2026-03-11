@@ -1,26 +1,63 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-export default function Home({ userName, onLogin }) {
+export default function Home({ userEmail, authChecked, onAuthSuccess }) {
   const navigate = useNavigate();
 
-  const [formUserName, setFormUserName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [statusMsg, setStatusMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(event) {
-    event.preventDefault();
+  async function submitAuth(endpoint) {
+    const cleanedEmail = email.trim();
 
-    const cleanedUser = formUserName.trim();
-    if (!cleanedUser) {
-      setErrorMsg("Please enter a username.");
+    if (!cleanedEmail) {
+      setErrorMsg("Please enter an email.");
       return;
     }
 
-    onLogin(cleanedUser);
-    setPassword("");
+    if (!password) {
+      setErrorMsg("Please enter a password.");
+      return;
+    }
+
+    setLoading(true);
     setErrorMsg("");
-    navigate("/play");
+    setStatusMsg(endpoint === "/api/auth/create" ? "Creating account..." : "Logging in...");
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          email: cleanedEmail,
+          password,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setErrorMsg(data.msg || "Authentication failed.");
+        setStatusMsg("");
+        return;
+      }
+
+      onAuthSuccess(data.email || cleanedEmail);
+      setPassword("");
+      setStatusMsg(endpoint === "/api/auth/create" ? "Account created." : "Login successful.");
+      navigate("/play");
+    } catch {
+      setErrorMsg("Could not reach the service.");
+      setStatusMsg("");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -35,7 +72,7 @@ export default function Home({ userName, onLogin }) {
           Start a new decision build, or check your past results.
         </p>
 
-        {userName ? (
+        {authChecked && userEmail ? (
           <div
             style={{
               marginBottom: "1rem",
@@ -45,14 +82,14 @@ export default function Home({ userName, onLogin }) {
               border: "1px solid rgba(255,255,255,.08)",
             }}
           >
-            <strong>Welcome back, {userName}.</strong>
+            <strong>Welcome back, {userEmail}.</strong>
             <div style={{ color: "var(--muted)", marginTop: ".35rem" }}>
-              Your mock session is active and saved in this browser using localStorage.
+              Your session is being tracked by the backend now, not fake browser-only state.
             </div>
           </div>
         ) : (
           <form
-            onSubmit={handleSubmit}
+            onSubmit={(event) => event.preventDefault()}
             style={{
               display: "grid",
               gap: ".75rem",
@@ -61,27 +98,27 @@ export default function Home({ userName, onLogin }) {
             }}
           >
             <div>
-              <label htmlFor="home-username" style={{ display: "block", marginBottom: ".35rem" }}>
-                Username
+              <label htmlFor="home-email" style={{ display: "block", marginBottom: ".35rem" }}>
+                Email
               </label>
               <input
-                id="home-username"
-                type="text"
-                placeholder="Enter a username"
-                value={formUserName}
-                onChange={(e) => setFormUserName(e.target.value)}
+                id="home-email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 autoComplete="username"
               />
             </div>
 
             <div>
               <label htmlFor="home-password" style={{ display: "block", marginBottom: ".35rem" }}>
-                Password (mocked)
+                Password
               </label>
               <input
                 id="home-password"
                 type="password"
-                placeholder="Anything works for now"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
@@ -94,10 +131,21 @@ export default function Home({ userName, onLogin }) {
               </div>
             ) : null}
 
+            {statusMsg ? (
+              <div style={{ color: "#b7ffb7" }}>
+                {statusMsg}
+              </div>
+            ) : null}
+
             <div style={{ display: "flex", gap: ".75rem", flexWrap: "wrap" }}>
-              <button type="submit">Log in (mock)</button>
+              <button type="button" onClick={() => submitAuth("/api/auth/login")} disabled={loading}>
+                Log in
+              </button>
+              <button type="button" onClick={() => submitAuth("/api/auth/create")} disabled={loading}>
+                Create account
+              </button>
               <small style={{ color: "var(--muted)", alignSelf: "center" }}>
-                P2 demo behavior: saves username locally, no backend yet.
+                Service deliverable behavior: real backend auth with cookies.
               </small>
             </div>
           </form>

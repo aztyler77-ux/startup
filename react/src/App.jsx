@@ -6,16 +6,6 @@ import Scores from "./views/Scores";
 import About from "./views/About";
 import NotFound from "./views/NotFound";
 
-const USER_STORAGE_KEY = "decisionHelper.userName";
-
-function readStoredUserName() {
-  try {
-    return localStorage.getItem(USER_STORAGE_KEY) || "";
-  } catch {
-    return "";
-  }
-}
-
 function Nav() {
   const navClass = ({ isActive }) => (isActive ? "active" : undefined);
 
@@ -30,28 +20,47 @@ function Nav() {
 }
 
 export default function App() {
-  const [userName, setUserName] = useState(readStoredUserName);
+  const [userEmail, setUserEmail] = useState("");
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    try {
-      if (userName) {
-        localStorage.setItem(USER_STORAGE_KEY, userName);
-      } else {
-        localStorage.removeItem(USER_STORAGE_KEY);
-      }
-    } catch {
-      // localStorage unavailable; ignore for now
-    }
-  }, [userName]);
+    async function loadSession() {
+      try {
+        const response = await fetch("/api/auth/me", {
+          credentials: "include",
+        });
 
-  function handleLogin(nextUserName) {
-    const cleaned = String(nextUserName ?? "").trim();
-    if (!cleaned) return;
-    setUserName(cleaned);
+        if (response.ok) {
+          const data = await response.json();
+          setUserEmail(data.email || "");
+        } else {
+          setUserEmail("");
+        }
+      } catch {
+        setUserEmail("");
+      } finally {
+        setAuthChecked(true);
+      }
+    }
+
+    loadSession();
+  }, []);
+
+  async function handleAuthSuccess(email) {
+    setUserEmail(email || "");
   }
 
-  function handleLogout() {
-    setUserName("");
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "DELETE",
+        credentials: "include",
+      });
+    } catch {
+      // ignore logout fetch failures for now
+    }
+
+    setUserEmail("");
   }
 
   return (
@@ -73,10 +82,13 @@ export default function App() {
             }}
           >
             <small style={{ color: "var(--muted)" }}>
-              Logged in as: <strong style={{ color: "var(--text)" }}>{userName || "guest"}</strong>
+              Logged in as:{" "}
+              <strong style={{ color: "var(--text)" }}>
+                {authChecked ? (userEmail || "guest") : "checking session..."}
+              </strong>
             </small>
 
-            {userName ? (
+            {userEmail ? (
               <button
                 type="button"
                 className="btn btn-sm btn-outline-light"
@@ -94,9 +106,18 @@ export default function App() {
       <main className="site-main">
         <div className="app-shell">
           <Routes>
-            <Route path="/" element={<Home userName={userName} onLogin={handleLogin} />} />
-            <Route path="/play" element={<Play />} />
-            <Route path="/scores" element={<Scores />} />
+            <Route
+              path="/"
+              element={
+                <Home
+                  userEmail={userEmail}
+                  authChecked={authChecked}
+                  onAuthSuccess={handleAuthSuccess}
+                />
+              }
+            />
+            <Route path="/play" element={<Play userEmail={userEmail} />} />
+            <Route path="/scores" element={<Scores userEmail={userEmail} />} />
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
