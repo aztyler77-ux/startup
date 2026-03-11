@@ -152,7 +152,7 @@ apiRouter.post('/decisions', (req, res) => {
   res.status(201).send(decision);
 });
 
-app.get('*', (_req, res) => {
+app.use((_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
