@@ -18,7 +18,7 @@ function safeWriteJson(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // ignore storage failures for P2 mock behavior
+    // ignore storage failures for now
   }
 }
 
@@ -38,6 +38,10 @@ function clampScore(n) {
   const num = Number(n);
   if (Number.isNaN(num)) return 0;
   return Math.max(0, Math.min(10, num));
+}
+
+function normalizeName(value) {
+  return String(value || "").trim().toLowerCase();
 }
 
 export default function Play() {
@@ -64,12 +68,10 @@ export default function Play() {
           }))
         : [makeCriterion("Cost"), makeCriterion("Benefit")];
 
-    // scores[optionId][criterionId] = 0..10
     let scores = {};
     if (base?.scores && typeof base.scores === "object") {
       scores = base.scores;
     } else {
-      // Backward-compat: if old draft had per-option "score", map it into first criterion
       const firstCrit = criteria[0];
       for (const opt of options) {
         const legacy = base?.options?.find?.((o) => o?.id === opt.id)?.score;
@@ -78,7 +80,6 @@ export default function Play() {
       }
     }
 
-    // Ensure every option has every criterion key
     const normalizedScores = {};
     for (const opt of options) {
       normalizedScores[opt.id] = {};
@@ -101,19 +102,18 @@ export default function Play() {
   const [errorMsg, setErrorMsg] = useState("");
   const [result, setResult] = useState(null);
   const [saveMsg, setSaveMsg] = useState("");
+  const [suggestionMsg, setSuggestionMsg] = useState("");
+  const [suggestionLoading, setSuggestionLoading] = useState(false);
 
-  // Persist draft (mock DB)
   useEffect(() => {
     safeWriteJson(DRAFT_KEY, { decisionTitle, criteria, options, scores });
   }, [decisionTitle, criteria, options, scores]);
 
-  // Clear stale recommendation when inputs change
   useEffect(() => {
     setResult(null);
     setSaveMsg("");
   }, [decisionTitle, criteria, options, scores]);
 
-  // Computed totals + ranking
   const totals = useMemo(() => {
     const map = {};
     for (const opt of options) {
@@ -155,6 +155,7 @@ export default function Play() {
 
     setNewCriterionName("");
     setErrorMsg("");
+    setSuggestionMsg("");
   }
 
   function updateCriterion(id, patch) {
@@ -202,6 +203,7 @@ export default function Play() {
 
     setNewOptionName("");
     setErrorMsg("");
+    setSuggestionMsg("");
   }
 
   function removeOption(id) {
@@ -232,6 +234,84 @@ export default function Play() {
         [criterionId]: clampScore(value),
       },
     }));
+  }
+
+  async function suggestStarterFields() {
+    const title = decisionTitle.trim();
+
+    if (!title) {
+      setErrorMsg("Add a decision title first so the API has something to work with.");
+      return;
+    }
+
+    setSuggestionLoading(true);
+    setSuggestionMsg("Fetching starter fields from the service...");
+    setErrorMsg("");
+
+    try {
+      const response = await fetch("/api/suggestions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setSuggestionMsg("");
+        setErrorMsg(data.msg || "Could not load suggestions.");
+        return;
+      }
+
+      const incomingCriteria = Array.isArray(data.suggestedCriteria)
+        ? data.suggestedCriteria.map((name) => String(name || "").trim()).filter(Boolean)
+        : [];
+
+      const incomingOptions = Array.isArray(data.suggestedOptions)
+        ? data.suggestedOptions
+            .map((item) =>
+              typeof item === "string" ? String(item).trim() : String(item?.name || "").trim()
+            )
+            .filter(Boolean)
+        : [];
+
+      const existingCriteria = new Set(criteria.map((c) => normalizeName(c.name)));
+      const existingOptions = new Set(options.map((o) => normalizeName(o.name)));
+
+      const criteriaToAdd = incomingCriteria
+        .filter((name) => !existingCriteria.has(normalizeName(name)))
+        .map((name) => makeCriterion(name));
+
+      const optionsToAdd = incomingOptions
+        .filter((name) => !existingOptions.has(normalizeName(name)))
+        .map((name) => makeOption(name));
+
+      const nextCriteria = [...criteria, ...criteriaToAdd];
+      const nextOptions = [...options, ...optionsToAdd];
+
+      const nextScores = {};
+      for (const opt of nextOptions) {
+        nextScores[opt.id] = {};
+        for (const c of nextCriteria) {
+          nextScores[opt.id][c.id] = clampScore(scores?.[opt.id]?.[c.id] ?? 5);
+        }
+      }
+
+      setCriteria(nextCriteria);
+      setOptions(nextOptions);
+      setScores(nextScores);
+
+      setSuggestionMsg(
+        `Added ${criteriaToAdd.length} criteria and ${optionsToAdd.length} options from ${data.source || "the API"}.`
+      );
+    } catch {
+      setSuggestionMsg("");
+      setErrorMsg("Could not reach the suggestion service.");
+    } finally {
+      setSuggestionLoading(false);
+    }
   }
 
   function calculateRecommendation() {
@@ -266,7 +346,6 @@ export default function Play() {
       return;
     }
 
-    // Validate all score cells
     for (const opt of options) {
       for (const c of criteria) {
         const v = Number(scores?.[opt.id]?.[c.id]);
@@ -293,7 +372,6 @@ export default function Play() {
 
     setResult(nextResult);
 
-    // Save record compatible with Scores.jsx table
     const historyRecord = {
       id: makeId(),
       title,
@@ -303,7 +381,6 @@ export default function Play() {
       summary: runnerUp
         ? `${winner.name} won by ${margin} point${margin === 1 ? "" : "s"}.`
         : `${winner.name} won.`,
-      // extra fields for future use (Scores.jsx ignores them safely)
       criteria,
       options,
       scores,
@@ -314,7 +391,7 @@ export default function Play() {
     const nextHistory = [historyRecord, ...existingHistory].slice(0, 50);
     safeWriteJson(HISTORY_KEY, nextHistory);
 
-    setSaveMsg("Saved to local decision history (mock DB for P2).");
+    setSaveMsg("Saved to local decision history.");
   }
 
   function resetBuilder() {
@@ -339,6 +416,7 @@ export default function Play() {
     setErrorMsg("");
     setResult(null);
     setSaveMsg("");
+    setSuggestionMsg("");
 
     try {
       localStorage.removeItem(DRAFT_KEY);
@@ -351,7 +429,7 @@ export default function Play() {
     <>
       <h2 className="page-title">Decision Builder</h2>
       <p className="page-subtitle">
-        Full decision helper: define criteria + weights, score each option per criterion, get a weighted recommendation, and save it locally.
+        Build a weighted decision, score the tradeoffs, and optionally ask the service for starter criteria and options.
       </p>
 
       <div className="cardish" style={{ marginBottom: "1rem" }}>
@@ -362,10 +440,23 @@ export default function Play() {
         <input
           id="decision-title"
           type="text"
-          placeholder="Example: Which apartment should I choose?"
+          placeholder="Example: Which laptop should I buy?"
           value={decisionTitle}
           onChange={(e) => setDecisionTitle(e.target.value)}
         />
+
+        <div style={{ display: "flex", gap: ".75rem", flexWrap: "wrap", marginTop: ".85rem" }}>
+          <button type="button" onClick={suggestStarterFields} disabled={suggestionLoading}>
+            {suggestionLoading ? "Loading suggestions..." : "Suggest starter fields"}
+          </button>
+          <small style={{ color: "var(--muted)", alignSelf: "center" }}>
+            Uses a third-party-backed service call to suggest criteria and options from your title.
+          </small>
+        </div>
+
+        {suggestionMsg ? (
+          <div style={{ color: "#b7ffb7", marginTop: ".65rem" }}>{suggestionMsg}</div>
+        ) : null}
       </div>
 
       <div className="cardish" style={{ marginBottom: "1rem" }}>
