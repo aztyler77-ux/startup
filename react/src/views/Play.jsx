@@ -104,6 +104,8 @@ export default function Play() {
   const [saveMsg, setSaveMsg] = useState("");
   const [suggestionMsg, setSuggestionMsg] = useState("");
   const [suggestionLoading, setSuggestionLoading] = useState(false);
+  const [suggestedCriteria, setSuggestedCriteria] = useState([]);
+  const [suggestedOptions, setSuggestedOptions] = useState([]);
 
   useEffect(() => {
     safeWriteJson(DRAFT_KEY, { decisionTitle, criteria, options, scores });
@@ -155,7 +157,6 @@ export default function Play() {
 
     setNewCriterionName("");
     setErrorMsg("");
-    setSuggestionMsg("");
   }
 
   function updateCriterion(id, patch) {
@@ -203,7 +204,6 @@ export default function Play() {
 
     setNewOptionName("");
     setErrorMsg("");
-    setSuggestionMsg("");
   }
 
   function removeOption(id) {
@@ -245,7 +245,7 @@ export default function Play() {
     }
 
     setSuggestionLoading(true);
-    setSuggestionMsg("Fetching starter fields from the service...");
+    setSuggestionMsg("Fetching starter suggestions...");
     setErrorMsg("");
 
     try {
@@ -265,46 +265,22 @@ export default function Play() {
         return;
       }
 
-      const incomingCriteria = Array.isArray(data.suggestedCriteria)
-        ? data.suggestedCriteria.map((name) => String(name || "").trim()).filter(Boolean)
-        : [];
+      const currentCriteria = new Set(criteria.map((c) => normalizeName(c.name)));
+      const currentOptions = new Set(options.map((o) => normalizeName(o.name)));
 
-      const incomingOptions = Array.isArray(data.suggestedOptions)
-        ? data.suggestedOptions
-            .map((item) =>
-              typeof item === "string" ? String(item).trim() : String(item?.name || "").trim()
-            )
-            .filter(Boolean)
-        : [];
+      const nextCriteria = (Array.isArray(data.suggestedCriteria) ? data.suggestedCriteria : [])
+        .map((name) => String(name || "").trim())
+        .filter((name) => name && !currentCriteria.has(normalizeName(name)));
 
-      const existingCriteria = new Set(criteria.map((c) => normalizeName(c.name)));
-      const existingOptions = new Set(options.map((o) => normalizeName(o.name)));
+      const nextOptions = (Array.isArray(data.suggestedOptions) ? data.suggestedOptions : [])
+        .map((item) => typeof item === "string" ? item : item?.name)
+        .map((name) => String(name || "").trim())
+        .filter((name) => name && !currentOptions.has(normalizeName(name)));
 
-      const criteriaToAdd = incomingCriteria
-        .filter((name) => !existingCriteria.has(normalizeName(name)))
-        .map((name) => makeCriterion(name));
-
-      const optionsToAdd = incomingOptions
-        .filter((name) => !existingOptions.has(normalizeName(name)))
-        .map((name) => makeOption(name));
-
-      const nextCriteria = [...criteria, ...criteriaToAdd];
-      const nextOptions = [...options, ...optionsToAdd];
-
-      const nextScores = {};
-      for (const opt of nextOptions) {
-        nextScores[opt.id] = {};
-        for (const c of nextCriteria) {
-          nextScores[opt.id][c.id] = clampScore(scores?.[opt.id]?.[c.id] ?? 5);
-        }
-      }
-
-      setCriteria(nextCriteria);
-      setOptions(nextOptions);
-      setScores(nextScores);
-
+      setSuggestedCriteria(nextCriteria);
+      setSuggestedOptions(nextOptions);
       setSuggestionMsg(
-        `Added ${criteriaToAdd.length} criteria and ${optionsToAdd.length} options from ${data.source || "the API"}.`
+        `Loaded ${nextCriteria.length} suggested criteria and ${nextOptions.length} suggested options from ${data.source || "the API"}. Review them before adding.`
       );
     } catch {
       setSuggestionMsg("");
@@ -312,6 +288,54 @@ export default function Play() {
     } finally {
       setSuggestionLoading(false);
     }
+  }
+
+  function addSuggestedCriterion(name) {
+    const cleaned = String(name || "").trim();
+    if (!cleaned) return;
+
+    const newC = makeCriterion(cleaned);
+    setCriteria((prev) => [...prev, newC]);
+
+    setScores((prev) => {
+      const next = { ...(prev || {}) };
+      for (const opt of options) {
+        next[opt.id] = { ...(next[opt.id] || {}), [newC.id]: 5 };
+      }
+      return next;
+    });
+
+    setSuggestedCriteria((prev) => prev.filter((item) => item !== cleaned));
+  }
+
+  function addSuggestedOption(name) {
+    const cleaned = String(name || "").trim();
+    if (!cleaned) return;
+
+    const newO = makeOption(cleaned);
+    setOptions((prev) => [...prev, newO]);
+
+    setScores((prev) => {
+      const next = { ...(prev || {}) };
+      next[newO.id] = {};
+      for (const c of criteria) {
+        next[newO.id][c.id] = 5;
+      }
+      return next;
+    });
+
+    setSuggestedOptions((prev) => prev.filter((item) => item !== cleaned));
+  }
+
+  function addAllSuggested() {
+    suggestedCriteria.forEach((name) => addSuggestedCriterion(name));
+    suggestedOptions.forEach((name) => addSuggestedOption(name));
+  }
+
+  function clearSuggestions() {
+    setSuggestedCriteria([]);
+    setSuggestedOptions([]);
+    setSuggestionMsg("");
   }
 
   function calculateRecommendation() {
@@ -417,6 +441,8 @@ export default function Play() {
     setResult(null);
     setSaveMsg("");
     setSuggestionMsg("");
+    setSuggestedCriteria([]);
+    setSuggestedOptions([]);
 
     try {
       localStorage.removeItem(DRAFT_KEY);
@@ -440,7 +466,7 @@ export default function Play() {
         <input
           id="decision-title"
           type="text"
-          placeholder="Example: Which laptop should I buy?"
+          placeholder="Example: Which laptop should I buy for school?"
           value={decisionTitle}
           onChange={(e) => setDecisionTitle(e.target.value)}
         />
@@ -450,12 +476,55 @@ export default function Play() {
             {suggestionLoading ? "Loading suggestions..." : "Suggest starter fields"}
           </button>
           <small style={{ color: "var(--muted)", alignSelf: "center" }}>
-            Uses a third-party-backed service call to suggest criteria and options from your title.
+            Works better with a full phrase than a single word.
           </small>
         </div>
 
         {suggestionMsg ? (
           <div style={{ color: "#b7ffb7", marginTop: ".65rem" }}>{suggestionMsg}</div>
+        ) : null}
+
+        {(suggestedCriteria.length > 0 || suggestedOptions.length > 0) ? (
+          <div
+            style={{
+              marginTop: ".9rem",
+              padding: ".85rem",
+              borderRadius: "10px",
+              background: "rgba(255,255,255,.04)",
+              border: "1px solid rgba(255,255,255,.08)",
+            }}
+          >
+            <div style={{ display: "flex", gap: ".75rem", flexWrap: "wrap", marginBottom: ".75rem" }}>
+              <button type="button" onClick={addAllSuggested}>
+                Add all suggestions
+              </button>
+              <button type="button" className="btn btn-outline-light" onClick={clearSuggestions}>
+                Clear suggestions
+              </button>
+            </div>
+
+            <div style={{ marginBottom: ".75rem" }}>
+              <strong>Suggested criteria</strong>
+              <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap", marginTop: ".45rem" }}>
+                {suggestedCriteria.length > 0 ? suggestedCriteria.map((name) => (
+                  <button key={`crit-${name}`} type="button" className="btn btn-outline-light" onClick={() => addSuggestedCriterion(name)}>
+                    + {name}
+                  </button>
+                )) : <span style={{ color: "var(--muted)" }}>No new criteria suggested.</span>}
+              </div>
+            </div>
+
+            <div>
+              <strong>Suggested options</strong>
+              <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap", marginTop: ".45rem" }}>
+                {suggestedOptions.length > 0 ? suggestedOptions.map((name) => (
+                  <button key={`opt-${name}`} type="button" className="btn btn-outline-light" onClick={() => addSuggestedOption(name)}>
+                    + {name}
+                  </button>
+                )) : <span style={{ color: "var(--muted)" }}>No new options suggested.</span>}
+              </div>
+            </div>
+          </div>
         ) : null}
       </div>
 

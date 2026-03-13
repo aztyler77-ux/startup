@@ -1,14 +1,21 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function About() {
+  const [demoTitle, setDemoTitle] = useState("buy a new computer for school");
   const [demo, setDemo] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
 
   async function loadDemoSuggestions() {
+    const cleaned = demoTitle.trim();
+    if (!cleaned) {
+      setStatusMsg("Enter a decision phrase first.");
+      return;
+    }
+
     setLoading(true);
-    setStatusMsg('Fetching starter-field suggestions from the service...');
+    setStatusMsg("Fetching starter-field suggestions from the service...");
 
     try {
       const response = await fetch("/api/suggestions", {
@@ -16,7 +23,7 @@ export default function About() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ title: "buy a new computer" }),
+        body: JSON.stringify({ title: cleaned }),
       });
 
       const data = await response.json().catch(() => ({}));
@@ -36,10 +43,6 @@ export default function About() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    loadDemoSuggestions();
-  }, []);
 
   return (
     <>
@@ -69,27 +72,31 @@ export default function About() {
           }}
         >
           <h3 style={{ margin: 0 }}>Third-party Suggestions Demo</h3>
-          <button type="button" onClick={loadDemoSuggestions}>
-            Refresh demo
+          <button type="button" onClick={loadDemoSuggestions} disabled={loading}>
+            {loading ? "Loading..." : "Run demo"}
           </button>
         </div>
 
         <p style={{ color: "var(--muted)", marginTop: 0 }}>
-          The service deliverable now uses a third-party-backed suggestion flow. The frontend calls the backend, and the backend calls Datamuse to generate starter criteria and option ideas from a decision title.
+          The service deliverable uses a third-party-backed suggestion flow. The frontend calls the backend, and the backend calls Datamuse to generate starter criteria and option ideas from a decision phrase.
         </p>
 
-        {loading ? (
-          <div
-            style={{
-              padding: ".75rem",
-              borderRadius: "10px",
-              background: "rgba(255,255,255,.04)",
-              border: "1px solid rgba(255,255,255,.08)",
-            }}
-          >
-            Loading demo suggestions...
-          </div>
-        ) : demo ? (
+        <label htmlFor="demo-title" style={{ display: "block", marginBottom: ".35rem" }}>
+          Demo decision phrase
+        </label>
+        <input
+          id="demo-title"
+          type="text"
+          value={demoTitle}
+          onChange={(e) => setDemoTitle(e.target.value)}
+          placeholder="Example: buy a new computer for school"
+        />
+
+        <div style={{ color: "var(--muted)", marginTop: ".5rem", marginBottom: ".75rem", fontSize: ".95rem" }}>
+          This works better with a full phrase than a single word.
+        </div>
+
+        {demo ? (
           <div
             style={{
               padding: ".9rem",
@@ -116,18 +123,7 @@ export default function About() {
               Source: {demo.source || "Unknown"}
             </div>
           </div>
-        ) : (
-          <div
-            style={{
-              padding: ".75rem",
-              borderRadius: "10px",
-              background: "rgba(255,255,255,.04)",
-              border: "1px solid rgba(255,255,255,.08)",
-            }}
-          >
-            No demo suggestions available right now.
-          </div>
-        )}
+        ) : null}
 
         <div style={{ marginTop: ".75rem", color: "var(--muted)", fontSize: ".95rem" }}>
           Status: {statusMsg || "Idle"}

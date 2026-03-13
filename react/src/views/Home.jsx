@@ -4,28 +4,31 @@ import { Link, useNavigate } from "react-router-dom";
 export default function Home({ userEmail, authChecked, onAuthSuccess }) {
   const navigate = useNavigate();
 
+  const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function submitAuth(endpoint) {
-    const cleanedEmail = email.trim();
+  async function submitAuth(event) {
+    event.preventDefault();
 
+    const cleanedEmail = email.trim();
     if (!cleanedEmail) {
       setErrorMsg("Please enter an email.");
       return;
     }
-
     if (!password) {
       setErrorMsg("Please enter a password.");
       return;
     }
 
+    const endpoint = mode === "create" ? "/api/auth/create" : "/api/auth/login";
+
     setLoading(true);
     setErrorMsg("");
-    setStatusMsg(endpoint === "/api/auth/create" ? "Creating account..." : "Logging in...");
+    setStatusMsg(mode === "create" ? "Creating account..." : "Logging in...");
 
     try {
       const response = await fetch(endpoint, {
@@ -50,7 +53,7 @@ export default function Home({ userEmail, authChecked, onAuthSuccess }) {
 
       onAuthSuccess(data.email || cleanedEmail);
       setPassword("");
-      setStatusMsg(endpoint === "/api/auth/create" ? "Account created." : "Login successful.");
+      setStatusMsg(mode === "create" ? "Account created." : "Login successful.");
       navigate("/play");
     } catch {
       setErrorMsg("Could not reach the service.");
@@ -89,7 +92,7 @@ export default function Home({ userEmail, authChecked, onAuthSuccess }) {
           </div>
         ) : (
           <form
-            onSubmit={(event) => event.preventDefault()}
+            onSubmit={submitAuth}
             style={{
               display: "grid",
               gap: ".75rem",
@@ -97,6 +100,34 @@ export default function Home({ userEmail, authChecked, onAuthSuccess }) {
               maxWidth: "520px",
             }}
           >
+            <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                className={mode === "login" ? "" : "btn btn-outline-light"}
+                onClick={() => {
+                  setMode("login");
+                  setErrorMsg("");
+                  setStatusMsg("");
+                }}
+              >
+                Log in
+              </button>
+              <button
+                type="button"
+                className={mode === "create" ? "" : "btn btn-outline-light"}
+                onClick={() => {
+                  setMode("create");
+                  setErrorMsg("");
+                  setStatusMsg("");
+                }}
+              >
+                Create account
+              </button>
+              <small style={{ color: "var(--muted)", alignSelf: "center" }}>
+                Pick a mode first, then submit once like a normal website.
+              </small>
+            </div>
+
             <div>
               <label htmlFor="home-email" style={{ display: "block", marginBottom: ".35rem" }}>
                 Email
@@ -121,7 +152,7 @@ export default function Home({ userEmail, authChecked, onAuthSuccess }) {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
+                autoComplete={mode === "create" ? "new-password" : "current-password"}
               />
             </div>
 
@@ -138,11 +169,14 @@ export default function Home({ userEmail, authChecked, onAuthSuccess }) {
             ) : null}
 
             <div style={{ display: "flex", gap: ".75rem", flexWrap: "wrap" }}>
-              <button type="button" onClick={() => submitAuth("/api/auth/login")} disabled={loading}>
-                Log in
-              </button>
-              <button type="button" onClick={() => submitAuth("/api/auth/create")} disabled={loading}>
-                Create account
+              <button type="submit" disabled={loading}>
+                {loading
+                  ? mode === "create"
+                    ? "Creating account..."
+                    : "Logging in..."
+                  : mode === "create"
+                    ? "Create account"
+                    : "Log in"}
               </button>
               <small style={{ color: "var(--muted)", alignSelf: "center" }}>
                 Service deliverable behavior: real backend auth with cookies.
