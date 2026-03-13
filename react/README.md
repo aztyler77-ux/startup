@@ -1,16 +1,46 @@
-# React + Vite
+# Decision Helper - CS 260 Startup Service Deliverable
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Decision Helper is a startup web app for comparing options, weighting criteria, and calculating a recommendation. For the service deliverable, the project now includes a Node/Express backend, cookie-based authentication, bcrypt password hashing, service endpoints, and a third-party-backed starter-field suggestion feature.
 
-Currently, two official plugins are available:
+## Service deliverable features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js + Express HTTP service in `react/service/index.js`
+- Frontend React build served through Express static middleware from `react/service/public`
+- Backend endpoints for:
+  - service health check
+  - account creation
+  - login
+  - logout
+  - restricted session check
+  - decision list/save routes
+  - starter-field suggestions
+- Password hashing with `bcryptjs`
+- Frontend auth flow wired to backend endpoints
+- Third-party-backed suggestions flow:
+  - frontend sends a decision title to `/api/suggestions`
+  - backend calls Datamuse
+  - backend returns suggested criteria and options for the decision builder
 
-## React Compiler
+## Third-party API note
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The original mock "insight/quote" idea was replaced with a better product-aligned feature: starter criteria and option suggestions for the Decision Builder. This better matches the core purpose of Decision Helper and still satisfies the service-deliverable requirement that the frontend visibly uses a third-party-backed service flow.
 
-## Expanding the ESLint configuration
+## Files to inspect
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `react/service/index.js` - Express backend and API routes
+- `react/src/App.jsx` - app shell and auth/session wiring
+- `react/src/views/Home.jsx` - login/create-account UI wired to backend auth
+- `react/src/views/Play.jsx` - decision builder + starter suggestions button
+- `react/src/views/About.jsx` - third-party suggestions demo
+- `../notes.md` - implementation notes and verification trail
+
+## Prerequisite / TA-facing notes
+
+- GitHub repository link is visible in the app UI
+- Commit history was built incrementally in meaningful chunks
+- Simon prerequisite was previously verified live in production
+- Startup service deliverable work was implemented and tested locally before deployment
+
+## Current limitation
+
+Decision history is still stored locally in browser storage for now. Persistent database storage will be added in the database deliverable.

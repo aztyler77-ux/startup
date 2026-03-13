@@ -34,21 +34,49 @@ apiRouter.get('/test', (_req, res) => {
   res.send({ msg: 'Decision Helper service is alive' });
 });
 
-apiRouter.get('/quote', async (_req, res) => {
+apiRouter.post('/suggestions', async (req, res) => {
+  const title = String(req.body?.title || '').trim();
+
+  if (!title) {
+    return res.status(400).send({ msg: 'A decision title is required' });
+  }
+
   try {
-    const response = await fetch('https://api.quotable.io/random');
+    const response = await fetch(
+      `https://api.datamuse.com/words?ml=${encodeURIComponent(title)}&max=12`
+    );
+
     if (!response.ok) {
       throw new Error(`Third-party API error: ${response.status}`);
     }
 
     const data = await response.json();
+
+    const relatedWords = [...new Set(
+      (Array.isArray(data) ? data : [])
+        .map((item) => String(item?.word || '').trim())
+        .filter((word) => word && word.length > 2)
+    )].slice(0, 8);
+
+    const genericCriteria = ['Cost', 'Time', 'Risk', 'Convenience', 'Long-term value'];
+    const suggestedCriteria = [...new Set([
+      ...genericCriteria,
+      ...relatedWords.slice(0, 3).map((word) => word[0].toUpperCase() + word.slice(1)),
+    ])].slice(0, 6);
+
+    const suggestedOptions = relatedWords.slice(0, 5).map((word) => ({
+      name: word[0].toUpperCase() + word.slice(1),
+    }));
+
     res.send({
-      content: data.content,
-      author: data.author,
+      decisionTitle: title,
+      suggestedCriteria,
+      suggestedOptions,
+      source: 'Datamuse',
     });
   } catch (err) {
     res.status(500).send({
-      msg: 'Failed to fetch quote',
+      msg: 'Failed to fetch suggestions',
       error: err.message,
     });
   }

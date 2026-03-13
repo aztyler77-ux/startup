@@ -1,66 +1,44 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const mockInsights = [
-  {
-    title: "Clarify the real decision first",
-    body: "Most bad decisions are actually vague decisions. Write the real question in one sentence before scoring options.",
-    source: "Decision Helper Insight Service (mock)",
-  },
-  {
-    title: "Separate facts from fear",
-    body: "List what you know, what you assume, and what you fear. Treating all three as the same thing makes every option look worse.",
-    source: "Decision Helper Insight Service (mock)",
-  },
-  {
-    title: "Don’t overfit your criteria",
-    body: "If you create 17 criteria, you may be optimizing for the feeling of control instead of making a choice.",
-    source: "Decision Helper Insight Service (mock)",
-  },
-  {
-    title: "A good decision can still feel uncomfortable",
-    body: "Discomfort is not always a red flag. Sometimes it just means the tradeoff is real.",
-    source: "Decision Helper Insight Service (mock)",
-  },
-];
-
-function mockFetchDecisionInsight() {
-  return new Promise((resolve) => {
-    const delayMs = 650 + Math.floor(Math.random() * 700);
-
-    setTimeout(() => {
-      const pick = mockInsights[Math.floor(Math.random() * mockInsights.length)];
-      resolve({
-        ...pick,
-        fetchedAt: new Date().toISOString(),
-      });
-    }, delayMs);
-  });
-}
-
-function formatDateTime(iso) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString();
-}
-
 export default function About() {
-  const [insight, setInsight] = useState(null);
+  const [demo, setDemo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusMsg, setStatusMsg] = useState("");
 
-  async function loadInsight() {
+  async function loadDemoSuggestions() {
     setLoading(true);
-    setStatusMsg("Fetching mock third-party insight...");
-    const next = await mockFetchDecisionInsight();
-    setInsight(next);
-    setLoading(false);
-    setStatusMsg("Mock API response loaded.");
+    setStatusMsg('Fetching starter-field suggestions from the service...');
+
+    try {
+      const response = await fetch("/api/suggestions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title: "buy a new computer" }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setDemo(null);
+        setStatusMsg(data.msg || "Failed to load demo suggestions.");
+        return;
+      }
+
+      setDemo(data);
+      setStatusMsg(`Live third-party-backed suggestions loaded from ${data.source || "the API"}.`);
+    } catch {
+      setDemo(null);
+      setStatusMsg("Could not reach the service.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
-    loadInsight();
+    loadDemoSuggestions();
   }, []);
 
   return (
@@ -90,14 +68,14 @@ export default function About() {
             marginBottom: ".5rem",
           }}
         >
-          <h3 style={{ margin: 0 }}>Third-party Insight (Mocked for React P2)</h3>
-          <button type="button" onClick={loadInsight}>
-            Refresh insight
+          <h3 style={{ margin: 0 }}>Third-party Suggestions Demo</h3>
+          <button type="button" onClick={loadDemoSuggestions}>
+            Refresh demo
           </button>
         </div>
 
         <p style={{ color: "var(--muted)", marginTop: 0 }}>
-          This simulates a future API-backed feature. For React Part 2, it is mocked in the frontend with a Promise + setTimeout.
+          The service deliverable now uses a third-party-backed suggestion flow. The frontend calls the backend, and the backend calls Datamuse to generate starter criteria and option ideas from a decision title.
         </p>
 
         {loading ? (
@@ -109,9 +87,9 @@ export default function About() {
               border: "1px solid rgba(255,255,255,.08)",
             }}
           >
-            Loading insight...
+            Loading demo suggestions...
           </div>
-        ) : insight ? (
+        ) : demo ? (
           <div
             style={{
               padding: ".9rem",
@@ -120,16 +98,36 @@ export default function About() {
               border: "1px solid rgba(255,255,255,.08)",
             }}
           >
-            <div style={{ fontWeight: 700 }}>{insight.title}</div>
-            <p style={{ margin: ".5rem 0", color: "var(--muted)" }}>{insight.body}</p>
-            <div style={{ color: "var(--muted)", fontSize: ".9rem" }}>
-              Source: {insight.source}
+            <div style={{ fontWeight: 700, marginBottom: ".5rem" }}>
+              Demo title: {demo.decisionTitle}
             </div>
+
+            <div style={{ marginBottom: ".6rem" }}>
+              <strong>Suggested criteria:</strong>{" "}
+              {(demo.suggestedCriteria || []).join(", ") || "None"}
+            </div>
+
+            <div style={{ marginBottom: ".35rem" }}>
+              <strong>Suggested options:</strong>{" "}
+              {(demo.suggestedOptions || []).map((item) => item.name).join(", ") || "None"}
+            </div>
+
             <div style={{ color: "var(--muted)", fontSize: ".9rem" }}>
-              Loaded: {formatDateTime(insight.fetchedAt)}
+              Source: {demo.source || "Unknown"}
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div
+            style={{
+              padding: ".75rem",
+              borderRadius: "10px",
+              background: "rgba(255,255,255,.04)",
+              border: "1px solid rgba(255,255,255,.08)",
+            }}
+          >
+            No demo suggestions available right now.
+          </div>
+        )}
 
         <div style={{ marginTop: ".75rem", color: "var(--muted)", fontSize: ".95rem" }}>
           Status: {statusMsg || "Idle"}
@@ -139,9 +137,9 @@ export default function About() {
       <div className="cardish">
         <h3 style={{ marginTop: 0 }}>What comes next</h3>
         <ul style={{ marginBottom: ".75rem", color: "var(--muted)" }}>
-          <li>Service deliverable: replace mocked behaviors with backend API calls</li>
           <li>Database deliverable: persist users and decision history in MongoDB</li>
           <li>WebSocket deliverable: replace mock live updates with real-time events</li>
+          <li>Future improvement: smarter suggestion logic tuned for real decision categories</li>
         </ul>
 
         <div style={{ display: "flex", gap: ".75rem", flexWrap: "wrap" }}>

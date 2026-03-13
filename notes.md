@@ -75,3 +75,20 @@ CSS refinement pass (Feb 4): added spacing/radius tokens, improved form focus/pl
 Feb 26 2026: React P2 patch for TA feedback — removed Home hero image and updated Play to criteria + weight + scoring grid (option×criterion) with weighted totals; deployed bundle index-TgAf31x1.js.
 
 2026-02-26 23:49 UTC: React P2 TA patch — added criteria+weight scoring grid w/ weighted totals; removed Home/About images per TA feedback; deployed /assets/index-De-VE57_.js /assets/index-D-Cvkrpb.css
+
+## 2026-03-11 - Service deliverable work (Decision Helper)
+- Added a real Express backend in `react/service/index.js`
+- Added auth endpoints for create account, login, logout, and restricted session lookup
+- Added password hashing with `bcryptjs`
+- Updated Vite local dev proxy so frontend `/api` requests route to the service on port 4000
+- Built React output into `react/service/public` so Express serves the frontend bundle
+- Verified local auth flow with curl:
+  - create account returned auth cookie
+  - restricted `/api/auth/me` returned logged-in user
+  - logout cleared access and protected route returned 401
+- Replaced the old mock third-party idea with a more product-aligned service feature:
+  - new endpoint: `POST /api/suggestions`
+  - backend calls Datamuse
+  - frontend uses the returned suggestions to seed criteria and options in the Decision Builder
+- Updated About page to demo the live suggestion flow instead of the old quote concept
+- Reminder for submission: deploy startup service to production, verify live routes, and push all commits before turning in
