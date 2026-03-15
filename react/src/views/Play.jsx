@@ -328,8 +328,8 @@ export default function Play() {
   }
 
   function addAllSuggested() {
-    suggestedCriteria.forEach((name) => addSuggestedCriterion(name));
-    suggestedOptions.forEach((name) => addSuggestedOption(name));
+    [...suggestedCriteria].forEach((name) => addSuggestedCriterion(name));
+    [...suggestedOptions].forEach((name) => addSuggestedOption(name));
   }
 
   function clearSuggestions() {
@@ -338,7 +338,7 @@ export default function Play() {
     setSuggestionMsg("");
   }
 
-  function calculateRecommendation() {
+  async function calculateRecommendation() {
     setSaveMsg("");
     setErrorMsg("");
 
@@ -415,7 +415,36 @@ export default function Play() {
     const nextHistory = [historyRecord, ...existingHistory].slice(0, 50);
     safeWriteJson(HISTORY_KEY, nextHistory);
 
-    setSaveMsg("Saved to local decision history.");
+    try {
+      const serviceCriteria = criteria.map((c) => c.name);
+      const serviceOptions = options.map((o) => ({
+        name: o.name,
+        scores: criteria.map((c) => clampScore(scores?.[o.id]?.[c.id] ?? 0)),
+      }));
+
+      const response = await fetch("/api/decisions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          title,
+          criteria: serviceCriteria,
+          options: serviceOptions,
+        }),
+      });
+
+      if (response.ok) {
+        setSaveMsg("Saved to backend decision history and local backup.");
+      } else if (response.status === 401) {
+        setSaveMsg("Calculated successfully. Log in to save this decision to your backend history.");
+      } else {
+        setSaveMsg("Calculated successfully. Local backup saved, but backend save failed.");
+      }
+    } catch {
+      setSaveMsg("Calculated successfully. Local backup saved, but backend save failed.");
+    }
   }
 
   function resetBuilder() {

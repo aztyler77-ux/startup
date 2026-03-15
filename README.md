@@ -144,12 +144,23 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Node.js/Express HTTP service** - I did not complete this part of the deliverable.
-- [ ] **Static middleware for frontend** - I did not complete this part of the deliverable.
-- [ ] **Calls to third party endpoints** - I did not complete this part of the deliverable.
-- [ ] **Backend service endpoints** - I did not complete this part of the deliverable.
-- [ ] **Frontend calls service endpoints** - I did not complete this part of the deliverable.
-- [ ] **Supports registration, login, logout, and restricted endpoint** - I did not complete this part of the deliverable.
+- [x] **Node.js/Express HTTP service** - Added an Express backend in `react/service/index.js` and deployed startup through a reverse proxy to the service on port 4000.
+- [x] **Static middleware for frontend** - The React frontend build is copied into `react/service/public` and served by Express static middleware.
+- [x] **Calls to third party endpoints** - Added a third-party-backed suggestions feature. The frontend calls `/api/suggestions`, and the backend calls Datamuse to generate starter criteria and option ideas from a decision phrase.
+- [x] **Backend service endpoints** - Added backend endpoints for auth, decision saving/history, service health, and starter suggestions.
+- [x] **Frontend calls service endpoints** - The frontend now calls backend endpoints for login/logout/session lookup, decision history, decision save on calculate, and starter suggestions.
+- [x] **Supports registration, login, logout, and restricted endpoint** - Implemented `/api/auth/create`, `/api/auth/login`, `/api/auth/logout`, and `/api/auth/me` with cookie auth.
+- [x] **Uses bcrypt to hash passwords** - Passwords are hashed with `bcryptjs` before being stored in the in-memory user store for this deliverable.
+
+Production Startup URL:
+- https://startup.tnich-startup.click
+
+TA/grading notes:
+- Service health endpoint: `/api/test`
+- Third-party-backed suggestions endpoint: `POST /api/suggestions`
+- Decision save endpoint used by Play page: `POST /api/decisions`
+- Decision history endpoint used by Scores page: `GET /api/decisions/mine`
+- Startup is deployed through Caddy reverse proxy to the Node service on port 4000.
 
 ## 🚀 DB deliverable
 
