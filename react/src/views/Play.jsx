@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 
-const HISTORY_KEY = "decisionHelper.history";
 const DRAFT_KEY = "decisionHelper.playDraft";
 
 function safeReadJson(key, fallback) {
@@ -396,25 +395,6 @@ export default function Play() {
 
     setResult(nextResult);
 
-    const historyRecord = {
-      id: makeId(),
-      title,
-      winner: winner?.name ?? "—",
-      winnerScore: winner?.total ?? 0,
-      createdAt: nextResult.calculatedAt,
-      summary: runnerUp
-        ? `${winner.name} won by ${margin} point${margin === 1 ? "" : "s"}.`
-        : `${winner.name} won.`,
-      criteria,
-      options,
-      scores,
-      totals,
-    };
-
-    const existingHistory = safeReadJson(HISTORY_KEY, []);
-    const nextHistory = [historyRecord, ...existingHistory].slice(0, 50);
-    safeWriteJson(HISTORY_KEY, nextHistory);
-
     try {
       const serviceCriteria = criteria.map((c) => c.name);
       const serviceOptions = options.map((o) => ({
@@ -436,14 +416,14 @@ export default function Play() {
       });
 
       if (response.ok) {
-        setSaveMsg("Saved to backend decision history and local backup.");
+        setSaveMsg("Saved to your MongoDB-backed decision history.");
       } else if (response.status === 401) {
-        setSaveMsg("Calculated successfully. Log in to save this decision to your backend history.");
+        setSaveMsg("Calculated successfully. Log in to save this decision to your MongoDB-backed history.");
       } else {
-        setSaveMsg("Calculated successfully. Local backup saved, but backend save failed.");
+        setSaveMsg("Calculated successfully, but the backend save failed.");
       }
     } catch {
-      setSaveMsg("Calculated successfully. Local backup saved, but backend save failed.");
+      setSaveMsg("Calculated successfully, but the backend save failed.");
     }
   }
 
