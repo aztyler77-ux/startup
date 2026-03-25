@@ -1,6 +1,6 @@
-# Decision Helper - CS 260 Startup Service Deliverable
+# Decision Helper - CS 260 Startup DB Deliverable
 
-Decision Helper is a startup web app for comparing options, weighting criteria, and calculating a recommendation. For the service deliverable, the project now includes a Node/Express backend, cookie-based authentication, bcrypt password hashing, service endpoints, and a third-party-backed starter-field suggestion feature.
+Decision Helper is a startup web app for comparing options, weighting criteria, and calculating a recommendation. For the DB deliverable, the project now stores user credentials and saved decision history in MongoDB Atlas, while keeping the Node/Express backend, cookie-based authentication, bcrypt password hashing, and service endpoints from the previous deliverable.
 
 ## Service deliverable features
 
@@ -43,4 +43,4 @@ The original mock "insight/quote" idea was replaced with a better product-aligne
 
 ## Current limitation
 
-Decision history is still stored locally in browser storage for now. Persistent database storage will be added in the database deliverable.
+Decision history and credentials are now stored in MongoDB Atlas. The main remaining future deliverable work is real-time websocket functionality.
