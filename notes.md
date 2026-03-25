@@ -92,3 +92,15 @@ Feb 26 2026: React P2 patch for TA feedback — removed Home hero image and upda
   - frontend uses the returned suggestions to seed criteria and options in the Decision Builder
 - Updated About page to demo the live suggestion flow instead of the old quote concept
 - Reminder for submission: deploy startup service to production, verify live routes, and push all commits before turning in
+
+## DB deliverable work
+- Created a MongoDB Atlas cluster for the Startup DB deliverable.
+- Added `react/service/dbConfig.json` on the server and kept it out of Git with `.gitignore`.
+- Added the MongoDB Node driver to the Startup backend service.
+- Created `react/service/database.js` to connect to MongoDB Atlas and expose helpers for users and saved decisions.
+- Replaced in-memory auth and decision storage with MongoDB-backed collections.
+- Stored hashed credentials in MongoDB using `bcryptjs`.
+- Stored and retrieved saved decision history from MongoDB.
+- Verified the backend locally with create account, auth session lookup, save decision, and load decision history.
+- Rebuilt the frontend bundle and redeployed the Startup app with MongoDB-backed history messaging.
+- Verified the production Startup service was live and responding at `/api/test`.
