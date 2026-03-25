@@ -87,7 +87,7 @@ export default function Home({ userEmail, authChecked, onAuthSuccess }) {
           >
             <strong>Welcome back, {userEmail}.</strong>
             <div style={{ color: "var(--muted)", marginTop: ".35rem" }}>
-              Your session is being tracked by the backend now, not fake browser-only state.
+              Your session and saved decision history are now backed by MongoDB, not fake browser-only state.
             </div>
           </div>
         ) : (
@@ -179,7 +179,7 @@ export default function Home({ userEmail, authChecked, onAuthSuccess }) {
                     : "Log in"}
               </button>
               <small style={{ color: "var(--muted)", alignSelf: "center" }}>
-                Service deliverable behavior: real backend auth with cookies.
+                DB deliverable behavior: MongoDB-backed auth with cookies and persistent decision history.
               </small>
             </div>
           </form>
