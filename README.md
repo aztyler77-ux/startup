@@ -166,8 +166,24 @@ TA/grading notes:
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Stores data in MongoDB** - I did not complete this part of the deliverable.
-- [ ] **Stores credentials in MongoDB** - I did not complete this part of the deliverable.
+- [x] **Stores data in MongoDB** - Decision Helper now stores saved decision history in MongoDB Atlas instead of keeping the deliverable data in memory or browser-only storage. The backend writes decision records into MongoDB and the Scores page loads the signed-in user's saved decisions from the database.
+- [x] **Stores credentials in MongoDB** - Account credentials are now stored in MongoDB Atlas. The backend hashes passwords with `bcryptjs`, stores the hashed credentials in MongoDB, issues auth tokens, and restores sessions by looking users up from the database.
+
+Production Startup URL:
+- https://startup.tnich-startup.click
+
+Files to inspect:
+- `react/service/database.js` - MongoDB connection + collection helpers
+- `react/service/index.js` - auth and decision endpoints now backed by MongoDB
+- `react/src/views/Play.jsx` - decision save flow messaging updated for Mongo-backed history
+- `react/src/views/Scores.jsx` - loads saved decision history from backend/MongoDB
+
+TA/grading notes:
+- MongoDB Atlas cluster is connected through `react/service/dbConfig.json` on the server, and that file is gitignored.
+- Credentials are stored in the `user` collection.
+- Saved decision records are stored in the `decision` collection.
+- Verified locally on the server with account creation, authenticated session lookup, decision save, and decision history retrieval.
+- Verified the deployed production service at `https://startup.tnich-startup.click/api/test`.
 
 ## 🚀 WebSocket deliverable
 
