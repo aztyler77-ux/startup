@@ -78,7 +78,7 @@ export default function About() {
         </div>
 
         <p style={{ color: "var(--muted)", marginTop: 0 }}>
-          The service deliverable uses a third-party-backed suggestion flow. The frontend calls the backend, and the backend calls Datamuse to generate starter criteria and option ideas from a decision phrase.
+          The app now uses a MongoDB-backed backend for auth and saved decision history, and it still uses a third-party-backed suggestion flow. The frontend calls the backend, and the backend calls Datamuse to generate starter criteria and option ideas from a decision phrase.
         </p>
 
         <label htmlFor="demo-title" style={{ display: "block", marginBottom: ".35rem" }}>
@@ -133,7 +133,7 @@ export default function About() {
       <div className="cardish">
         <h3 style={{ marginTop: 0 }}>What comes next</h3>
         <ul style={{ marginBottom: ".75rem", color: "var(--muted)" }}>
-          <li>Database deliverable: persist users and decision history in MongoDB</li>
+          <li>Database deliverable: completed with MongoDB-backed users and decision history</li>
           <li>WebSocket deliverable: replace mock live updates with real-time events</li>
           <li>Future improvement: smarter suggestion logic tuned for real decision categories</li>
         </ul>
