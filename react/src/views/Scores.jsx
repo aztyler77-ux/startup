@@ -10,6 +10,8 @@ function formatDate(isoString) {
 export default function Scores() {
   const [history, setHistory] = useState([]);
   const [statusMsg, setStatusMsg] = useState("");
+  const [liveStatus, setLiveStatus] = useState("Connecting to live updates...");
+  const [liveEvents, setLiveEvents] = useState([]);
 
   async function refreshHistory() {
     try {
@@ -32,9 +34,11 @@ export default function Scores() {
       }
 
       const mapped = (Array.isArray(data) ? data : []).map((item) => {
-        const scores = Array.isArray(item.options) ? item.options.map((o) =>
-          Array.isArray(o.scores) ? o.scores.reduce((sum, n) => sum + Number(n || 0), 0) : 0
-        ) : [];
+        const scores = Array.isArray(item.options)
+          ? item.options.map((o) =>
+              Array.isArray(o.scores) ? o.scores.reduce((sum, n) => sum + Number(n || 0), 0) : 0
+            )
+          : [];
 
         const winnerIndex = scores.length ? scores.indexOf(Math.max(...scores)) : -1;
         const winnerName =
@@ -66,12 +70,100 @@ export default function Scores() {
     refreshHistory();
   }, []);
 
+  useEffect(() => {
+    const protocol = window.location.protocol === "http:" ? "ws" : "wss";
+    const socket = new WebSocket(`${protocol}://${window.location.host}/ws`);
+
+    socket.onopen = () => {
+      setLiveStatus("Live updates connected.");
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+
+        if (payload.type === "decision_saved") {
+          setLiveEvents((current) => [
+            {
+              id: `${payload.createdAt || Date.now()}-${payload.title || "decision"}`,
+              title: payload.title || "Untitled decision",
+              ownerEmail: payload.ownerEmail || "Unknown user",
+              winnerName: payload.winnerName || "Unknown winner",
+              createdAt: payload.createdAt || new Date().toISOString(),
+            },
+            ...current,
+          ].slice(0, 8));
+
+          setLiveStatus("Received a live decision update.");
+          refreshHistory();
+        }
+      } catch {
+        setLiveStatus("Received a malformed live update.");
+      }
+    };
+
+    socket.onclose = () => {
+      setLiveStatus("Live updates disconnected.");
+    };
+
+    socket.onerror = () => {
+      setLiveStatus("Live updates encountered an error.");
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
+
   return (
     <>
       <h2 className="page-title">Decision History</h2>
       <p className="page-subtitle">
-        DB deliverable data view: loads saved decisions from your MongoDB-backed account history.
+        DB + WebSocket view: loads saved decisions from MongoDB-backed history and shows live decision-save activity.
       </p>
+
+      <div className="cardish" style={{ marginBottom: "1rem" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: ".75rem",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: ".75rem",
+          }}
+        >
+          <h3 style={{ margin: 0 }}>Live activity</h3>
+          <div style={{ color: "#b7ffb7" }}>{liveStatus}</div>
+        </div>
+
+        {liveEvents.length === 0 ? (
+          <p style={{ marginBottom: 0, color: "var(--muted)" }}>
+            No live decision events yet. Save a decision in another window to watch this feed update instantly.
+          </p>
+        ) : (
+          <div style={{ display: "grid", gap: ".75rem" }}>
+            {liveEvents.map((eventItem) => (
+              <div
+                key={eventItem.id}
+                style={{
+                  border: "1px solid rgba(255,255,255,.12)",
+                  borderRadius: "12px",
+                  padding: ".85rem 1rem",
+                  background: "rgba(255,255,255,.03)",
+                }}
+              >
+                <div style={{ fontWeight: 700, marginBottom: ".2rem" }}>
+                  {eventItem.ownerEmail} saved “{eventItem.title}”
+                </div>
+                <div style={{ color: "var(--muted)" }}>
+                  Winner: {eventItem.winnerName} • {formatDate(eventItem.createdAt)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="cardish" style={{ marginBottom: "1rem" }}>
         <div
