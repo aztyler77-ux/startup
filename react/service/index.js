@@ -1,17 +1,45 @@
 const express = require('express');
+const http = require('http');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
+const { WebSocketServer, WebSocket } = require('ws');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const db = require('./database');
 
 const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server, path: '/ws' });
+
 const port = process.argv[2] || process.env.PORT || 4000;
 const authCookieName = 'token';
+const liveClients = new Set();
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+wss.on('connection', (socket) => {
+  liveClients.add(socket);
+
+  socket.on('close', () => {
+    liveClients.delete(socket);
+  });
+
+  socket.on('error', () => {
+    liveClients.delete(socket);
+  });
+});
+
+function broadcastLiveEvent(payload) {
+  const message = JSON.stringify(payload);
+
+  for (const client of liveClients) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  }
+}
 
 const apiRouter = express.Router();
 app.use('/api', apiRouter);
@@ -181,6 +209,29 @@ apiRouter.post('/decisions', async (req, res) => {
   };
 
   await db.addDecision(decision);
+
+  const winner = options.length > 0
+    ? options.reduce((best, current) => {
+        const bestTotal = Array.isArray(best?.scores)
+          ? best.scores.reduce((sum, n) => sum + Number(n || 0), 0)
+          : -Infinity;
+
+        const currentTotal = Array.isArray(current?.scores)
+          ? current.scores.reduce((sum, n) => sum + Number(n || 0), 0)
+          : -Infinity;
+
+        return currentTotal > bestTotal ? current : best;
+      }, options[0])
+    : null;
+
+  broadcastLiveEvent({
+    type: 'decision_saved',
+    title: decision.title,
+    ownerEmail: decision.ownerEmail,
+    createdAt: decision.createdAt,
+    winnerName: winner?.name || 'Unknown winner',
+  });
+
   res.status(201).send(decision);
 });
 
@@ -210,7 +261,7 @@ function setAuthCookie(res, authToken) {
 }
 
 db.connectToDatabase().then(() => {
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`Listening on port ${port}`);
   });
 }).catch((err) => {
