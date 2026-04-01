@@ -189,11 +189,29 @@ TA/grading notes:
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Backend listens for WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **Frontend makes WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **Data sent over WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **WebSocket data displayed** - I did not complete this part of the deliverable.
-- [ ] **Application is fully functional** - I did not complete this part of the deliverable.
+- [x] **Backend listens for WebSocket connection** - Added a WebSocket server to the deployed Node/Express backend in `react/service/index.js` using the `ws` package. The backend now accepts WebSocket connections on the `/ws` path.
+- [x] **Frontend makes WebSocket connection** - The React frontend now opens a live WebSocket connection from the Scores page using the current page protocol (`ws`/`wss`) and host, connecting to `/ws`.
+- [x] **Data sent over WebSocket connection** - When a signed-in user saves a decision from the Play page, the backend broadcasts a `decision_saved` event containing the decision title, owner email, created timestamp, and winner name.
+- [x] **WebSocket data displayed** - The Scores page displays incoming live events in a visible **Live activity** panel and updates the live connection status text in the interface.
+- [x] **Application is fully functional** - Verified on the deployed production site with two browser windows: saving a decision in one window immediately displays the live decision-save event in the other window without refresh.
+
+Production Startup URL:
+- https://startup.tnich-startup.click
+
+Production Simon URL:
+- https://simon.tnich-startup.click
+
+Files to inspect:
+- `react/service/index.js` - Express + WebSocket server, `/ws` path, and `decision_saved` broadcast
+- `react/src/views/Scores.jsx` - frontend WebSocket connection and live activity display
+- `react/src/views/Play.jsx` - decision save flow that triggers the backend event
+- `react/vite.config.js` - local dev WebSocket proxy for `/ws`
+
+TA/grading notes:
+- WebSocket endpoint path: `/ws`
+- Live UI location: Scores page → **Live activity**
+- Broadcast event currently implemented: `decision_saved`
+- Production behavior verified by saving a decision in one logged-in window and observing the event appear instantly in another window.
 
 ## ✅ Startup HTML Deliverable
 
