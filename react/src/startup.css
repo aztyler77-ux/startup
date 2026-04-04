@@ -276,3 +276,27 @@ a:hover { color: var(--text); }
 
 /* Table headers readable */
 th { color: var(--muted) !important; }
+
+/* ===== Button contrast hardening ===== */
+button:disabled{
+  cursor: not-allowed;
+  opacity: 1;
+  color: rgba(242,245,255,.88);
+  background: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.28);
+}
+
+button:disabled:hover,
+button:disabled:active{
+  transform: none;
+  background: rgba(255,255,255,.16);
+}
+
+/* Better behavior for forced-colors / high-contrast environments */
+@media (forced-colors: active){
+  button,
+  button:disabled{
+    forced-color-adjust: auto;
+    border: 1px solid ButtonText;
+  }
+}
