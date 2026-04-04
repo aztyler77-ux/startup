@@ -104,3 +104,18 @@ Feb 26 2026: React P2 patch for TA feedback — removed Home hero image and upda
 - Verified the backend locally with create account, auth session lookup, save decision, and load decision history.
 - Rebuilt the frontend bundle and redeployed the Startup app with MongoDB-backed history messaging.
 - Verified the production Startup service was live and responding at `/api/test`.
+
+## 2026-04-02 - WebSocket deliverable work (Decision Helper)
+- Added real WebSocket support to the Startup backend using the `ws` package.
+- Updated `react/service/index.js` to create an HTTP server and attach a WebSocket server on the `/ws` path.
+- Added a broadcast helper so the backend can push live events to all connected clients.
+- Implemented a `decision_saved` live event when a signed-in user saves a decision from the Play page.
+- Updated `react/vite.config.js` so local development proxies `/ws` traffic to the backend service on port 4000.
+- Updated `react/src/views/Scores.jsx` to:
+  - open a frontend WebSocket connection
+  - display connection status
+  - render incoming live decision activity in a visible "Live activity" panel
+  - refresh MongoDB-backed decision history after a live save event arrives
+- Verified the deployed production app by opening two browser windows and saving a decision in one window while the other window updated instantly without refresh.
+- Verified the deployed backend was serving the WebSocket-enabled service from the production startup path rather than an older stale copy.
+- Follow-up polish: hardened button contrast across light-mode / disabled-state cases and removed the Vite starter light-theme button override that was washing buttons out in some browsers.
