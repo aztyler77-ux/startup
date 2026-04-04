@@ -7,6 +7,23 @@ function formatDate(isoString) {
   return date.toLocaleString();
 }
 
+function maskEmail(email) {
+  const raw = String(email || "").trim();
+  if (!raw.includes("@")) return "Another user";
+
+  const [name, domain] = raw.split("@");
+  const visible = name.slice(0, 2);
+  const masked = `${visible}${"*".repeat(Math.max(0, Math.min(6, name.length - 2)))}`;
+
+  return `${masked}@${domain}`;
+}
+
+function truncateText(value, maxLength = 48) {
+  const text = String(value || "").trim();
+  if (!text) return "Untitled decision";
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
+}
+
 export default function Scores({ onAuthInvalid }) {
   const [history, setHistory] = useState([]);
   const [statusMsg, setStatusMsg] = useState("");
@@ -88,8 +105,8 @@ export default function Scores({ onAuthInvalid }) {
             {
               id: `${payload.createdAt || Date.now()}-${payload.title || "decision"}`,
               title: payload.title || "Untitled decision",
-              ownerEmail: payload.ownerEmail || "Unknown user",
-              winnerName: payload.winnerName || "Unknown winner",
+              ownerLabel: maskEmail(payload.ownerEmail),
+              winnerName: truncateText(payload.winnerName || "Unknown winner", 36),
               createdAt: payload.createdAt || new Date().toISOString(),
             },
             ...current,
@@ -155,10 +172,13 @@ export default function Scores({ onAuthInvalid }) {
                 }}
               >
                 <div style={{ fontWeight: 700, marginBottom: ".2rem" }}>
-                  {eventItem.ownerEmail} saved “{eventItem.title}”
+                  New saved decision
+                </div>
+                <div style={{ color: "var(--muted)", marginBottom: ".2rem" }}>
+                  {truncateText(eventItem.title, 52)}
                 </div>
                 <div style={{ color: "var(--muted)" }}>
-                  Winner: {eventItem.winnerName} • {formatDate(eventItem.createdAt)}
+                  By {eventItem.ownerLabel} • Winner: {eventItem.winnerName} • {formatDate(eventItem.createdAt)}
                 </div>
               </div>
             ))}
