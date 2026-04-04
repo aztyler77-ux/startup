@@ -7,7 +7,7 @@ function formatDate(isoString) {
   return date.toLocaleString();
 }
 
-export default function Scores() {
+export default function Scores({ onAuthInvalid }) {
   const [history, setHistory] = useState([]);
   const [statusMsg, setStatusMsg] = useState("");
   const [liveStatus, setLiveStatus] = useState("Connecting to live updates...");
@@ -20,6 +20,7 @@ export default function Scores() {
       });
 
       if (response.status === 401) {
+        onAuthInvalid?.();
         setHistory([]);
         setStatusMsg("Log in to view your MongoDB-backed decision history.");
         return;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
 import Home from "./views/Home";
 import Play from "./views/Play";
@@ -23,31 +23,57 @@ export default function App() {
   const [userEmail, setUserEmail] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
 
-  useEffect(() => {
-    async function loadSession() {
-      try {
-        const response = await fetch("/api/auth/me", {
-          credentials: "include",
-        });
+  const refreshSession = useCallback(async () => {
+    try {
+      const response = await fetch("/api/auth/me", {
+        credentials: "include",
+      });
 
-        if (response.ok) {
-          const data = await response.json();
-          setUserEmail(data.email || "");
-        } else {
-          setUserEmail("");
-        }
-      } catch {
+      if (response.ok) {
+        const data = await response.json();
+        setUserEmail(data.email || "");
+      } else {
         setUserEmail("");
-      } finally {
-        setAuthChecked(true);
+      }
+    } catch {
+      setUserEmail("");
+    } finally {
+      setAuthChecked(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshSession();
+  }, [refreshSession]);
+
+  useEffect(() => {
+    function handleFocus() {
+      refreshSession();
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        refreshSession();
       }
     }
 
-    loadSession();
-  }, []);
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [refreshSession]);
 
   async function handleAuthSuccess(email) {
     setUserEmail(email || "");
+    setAuthChecked(true);
+  }
+
+  async function handleAuthInvalid() {
+    setUserEmail("");
+    setAuthChecked(true);
   }
 
   async function handleLogout() {
@@ -61,6 +87,7 @@ export default function App() {
     }
 
     setUserEmail("");
+    setAuthChecked(true);
   }
 
   return (
@@ -116,8 +143,24 @@ export default function App() {
                 />
               }
             />
-            <Route path="/play" element={<Play userEmail={userEmail} />} />
-            <Route path="/scores" element={<Scores userEmail={userEmail} />} />
+            <Route
+              path="/play"
+              element={
+                <Play
+                  userEmail={userEmail}
+                  onAuthInvalid={handleAuthInvalid}
+                />
+              }
+            />
+            <Route
+              path="/scores"
+              element={
+                <Scores
+                  userEmail={userEmail}
+                  onAuthInvalid={handleAuthInvalid}
+                />
+              }
+            />
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

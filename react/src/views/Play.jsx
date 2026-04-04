@@ -43,7 +43,7 @@ function normalizeName(value) {
   return String(value || "").trim().toLowerCase();
 }
 
-export default function Play() {
+export default function Play({ onAuthInvalid }) {
   const initialDraft = useMemo(() => {
     const raw = safeReadJson(DRAFT_KEY, null);
     const base = raw && typeof raw === "object" ? raw : null;
@@ -418,7 +418,8 @@ export default function Play() {
       if (response.ok) {
         setSaveMsg("Saved to your MongoDB-backed decision history.");
       } else if (response.status === 401) {
-        setSaveMsg("Calculated successfully. Log in to save this decision to your MongoDB-backed history.");
+        onAuthInvalid?.();
+        setSaveMsg("Calculated successfully, but your session expired. Log in again to save this decision to your MongoDB-backed history.");
       } else {
         setSaveMsg("Calculated successfully, but the backend save failed.");
       }
