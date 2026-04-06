@@ -67,7 +67,7 @@ export default function Home({ userEmail, authChecked, onAuthSuccess }) {
     <>
       <h2 className="page-title">Build a decision that sticks.</h2>
       <p className="page-subtitle">
-        Simple scoring. Clear tradeoffs. A recommendation you can commit to without re-litigating your soul at 2am.
+        Simple scoring. Clear tradeoffs. A recommendation you can commit to with confidence.
       </p>
 
       <div className="cardish" style={{ marginBottom: "1rem" }}>
